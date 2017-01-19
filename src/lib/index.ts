@@ -4,6 +4,8 @@
 
 /**
  * Check if object is a function
+ * For other implementations and discussions see:
+ * http://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
  */
 export function isFunction(obj):boolean {
   return !!(obj && obj.constructor && obj.call && obj.apply) // !! converts to a boolean
@@ -16,7 +18,7 @@ export function isFunction(obj):boolean {
  * bindMethods(this)
  * ```
  * Note that this replaces all functions of the OBJECT, not the prototype.
- * It is expensive to do that on a lot of object, use sparingly!
+ * It is expensive to do that on a lot of objects, use sparingly!
  *
  * @param  {Object} self - the instance to bind to
  */

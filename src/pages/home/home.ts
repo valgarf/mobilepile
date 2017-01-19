@@ -24,9 +24,9 @@ export class HomePage {
 
     // let obj = new TestClass();
     // obj.getSubject('test').subscribe(console.log.bind(console));
-
-    server.url= 'url'
-    server.login('pass').subscribe((res) => console.log(res))
+    //
+    // server.url= 'url'
+    // server.login('pass').subscribe((res) => console.log(res))
   }
 
 }

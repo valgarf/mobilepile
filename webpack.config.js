@@ -14,8 +14,6 @@ module.exports = {
   devtool: process.env.IONIC_GENERATE_SOURCE_MAP ? process.env.IONIC_SOURCE_MAP_TYPE : '',
 
   resolve: {
-    // root: path.resolve(__dirname),
-    // alias: npm_package._moduleAliases || {},
     alias: {"@root": path.resolve(__dirname, 'src/')},
     extensions: ['.ts', '.js', '.json'],
     modules: [path.resolve('node_modules')]
