@@ -1,13 +1,21 @@
-<ion-header>
+<!-- <ion-header>
   <ion-navbar hideBackButton>
     <ion-title>
       Login
     </ion-title>
   </ion-navbar>
-</ion-header>
+</ion-header> -->
+
+
 
 <ion-content>
   <form (ngSubmit)='login()'>
+    <ion-row>
+      <div class='center'>
+        <img src='assets/icon/logo-color.svg' class='left'/>
+        <img src='assets/icon/logo-name.svg' class='right'/>
+      </div>
+    </ion-row>
     <ion-row>
       <ion-item>
         <ion-label floating>URL</ion-label>
@@ -21,7 +29,7 @@
       </ion-item>
     </ion-row>
     <ion-row>
-      <button ion-button type='submit'>Login</button>
+      <button full ion-button type='submit'>Login</button>
     </ion-row>
   </form>
 </ion-content>

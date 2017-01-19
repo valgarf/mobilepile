@@ -53,8 +53,10 @@ export class Server {
           self.authenticated = true
         })
         .catch((err) => {
-          console.log('ERROR:', err)
-          if (err.ok == false) {
+          if (! err) {
+            self.errorMessage = 'Unknown connection error'
+          }
+          else if (err.ok == false) {
             self.errorMessage = err.statusText + ' (' + err.status + ')'
           }
           else {
