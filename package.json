@@ -5,9 +5,9 @@
   "private": true,
   "scripts": {
     "clean": "ionic-app-scripts clean",
-    "build": "ionic-app-scripts build",
-    "ionic:build": "ionic-app-scripts build",
-    "ionic:serve": "ionic-app-scripts serve"
+    "build": "ionic-app-scripts build --webpack ./webpack.config.js",
+    "ionic:build": "ionic-app-scripts build --webpack ./webpack.config.js",
+    "ionic:serve": "ionic-app-scripts serve --webpack ./webpack.config.js"
   },
   "dependencies": {
     "@angular/common": "2.2.1",
@@ -24,8 +24,8 @@
     "ionic-native": "2.2.11",
     "ionicons": "3.0.0",
     "rxjs": "5.0.0-beta.12",
-    "zone.js": "0.6.26",
-    "sw-toolbox": "3.4.0"
+    "sw-toolbox": "3.4.0",
+    "zone.js": "0.6.26"
   },
   "devDependencies": {
     "@ionic/app-scripts": "1.0.0",

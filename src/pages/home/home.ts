@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { NavController } from 'ionic-angular';
 
 // import {ReactingClass, reactify} from '../../lib';
-import { Server } from '../../server'
+import { Server } from '@root/server'
 
 // class TestClass extends ReactingClass {
 //   constructor() {
