@@ -1,6 +1,6 @@
 
 // export * from './reactive.ts';
-
+export * from './errors'
 
 /**
  * Check if object is a function

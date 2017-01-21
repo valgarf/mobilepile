@@ -4,6 +4,7 @@ import { NavController, ToastController } from 'ionic-angular';
 
 import { Server } from '@root/server'
 import * as Lib from '@root/lib'
+import * as Comp from '@root/components'
 
 @Component({
   selector: 'page-login',
@@ -13,10 +14,10 @@ export class LoginPage {
 
   url: string = ''
   password: string = ''
+  allowSubmission = true
 
-  constructor(public navCtrl: NavController, private toastCtrl: ToastController, private server: Server) {
+  constructor(public navCtrl: NavController, private msg: Comp.MessageHandler, private server: Server) {
     Lib.bindMethods(this)
-    server.errorMessageObs.subscribe(this.showErrors)
   }
 
   ionViewCanLeave(): boolean {
@@ -24,19 +25,17 @@ export class LoginPage {
   }
 
   login() {
-    console.log('LOGIN', this.url, this.password)
+    if (! this.allowSubmission) {
+      return
+    }
+    this.allowSubmission=false
+
+    // console.log('LOGIN', this.url, this.password)
+    let self = this
     this.server.url = this.url
     this.server.login(this.password)
-  }
-
-  showErrors(msg) {
-    if (msg!='') {
-      let toast = this.toastCtrl.create({
-         message: msg,
-         duration: 3000
-      })
-      toast.present()
-    }
+      .catch(this.msg.displayError)
+      .then((() => {self.allowSubmission = true}))
   }
 
 }

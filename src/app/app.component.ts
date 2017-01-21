@@ -2,7 +2,6 @@ import { Component, ViewChild } from '@angular/core';
 import { Platform } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 
-import { TabsPage } from '../pages/tabs/tabs';
 import { Server } from '@root/server'
 import * as Lib from '@root/lib'
 import * as Pages from '@root/pages'
@@ -11,7 +10,7 @@ import * as Pages from '@root/pages'
   templateUrl: 'app.html'
 })
 export class MyApp {
-  rootPage = TabsPage;
+  rootPage = Pages.MailboxPage;
   @ViewChild('rootNav') nav;
 
   activeLogin = false

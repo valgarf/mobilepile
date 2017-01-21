@@ -29,7 +29,7 @@
       </ion-item>
     </ion-row>
     <ion-row>
-      <button full ion-button type='submit'>Login</button>
+      <button full ion-button type='submit' [disabled]='!allowSubmission'>{{allowSubmission ? 'Login' : 'Please wait...'}}</button>
     </ion-row>
   </form>
 </ion-content>
