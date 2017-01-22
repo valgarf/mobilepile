@@ -4,7 +4,7 @@ import { MyApp } from './app.component';
 
 import * as Pages from '@root/pages';
 import * as Components from '@root/components'
-import { Server } from '@root/server';
+import * as Server from '@root/server';
 
 @NgModule({
   declarations: [
@@ -23,7 +23,8 @@ import { Server } from '@root/server';
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    Server,
+    Server.DataStore,
+    Server.Server,    
     Components.MessageHandler
   ]
 })

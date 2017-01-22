@@ -10,4 +10,9 @@
 
 <ion-content>
   Mails shall be here
+  <ion-list>
+    <ion-item *ngFor='let mail of mails | async'>
+      {{mail}}
+    </ion-item>
+  </ion-list>
 </ion-content>

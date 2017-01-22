@@ -1,4 +1,4 @@
-export interface Address {
+export interface IAddress {
   address: string; // email address "stefan@j-schulz.de",
   "crypto-policy"?: string; // "best-effort",
   "flags": {
@@ -17,11 +17,11 @@ export interface Address {
   "x-mailpile-rid"?: string // "e65587ba592"
 }
 
-export interface Mail {
+export interface IMessage {
 
 }
 
-export interface MailMetadata {
+export interface IMessageMetadata {
   body: {
     list?: string; //email of an email-ist this is sent to  "fachschaft@fachschaft.physik.tu-darmstadt.de",
     snippet: string; // start of the message "Hallo zusammen! Die Fachschaftssitzung wird ab"
@@ -57,7 +57,10 @@ export interface MailMetadata {
   }
 }
 
-export interface Tag {
+export type IMessageEntry = [string, "", [any]] | [string, "└", [any]] | [string, "r", [string]]
+export type IMessageThread = [IMessageEntry];
+
+export interface ITag {
   display: string; //"tag" oder "invisible"
   icon: string; //icon name
   label: boolean;
@@ -72,25 +75,25 @@ export interface Tag {
 }
 
 
-export interface ResultLogin {
+export interface IResultLogin {
   login_banner: string;
   login_failures: [number]; // timestamps of failures ???
 }
 
+export interface IData {
+  addresses: { [aid:string]: IAddress };
+  messages: { [mid:string]: IMessage };
+  metadata: { [mid:string]: IMessageMetadata };
+  tags: { [tid:string]: ITag };
+  threads: { [mid:string]: IMessageThread  };
+}
+
 // export type MessageThread = [string | MessageThread];
 // export type MessageThread = any;
-export type MessageEntry = [string, "", [any]] | [string, "└", [any]] | [string, "r", [string]]
-export type MessageThread = [MessageEntry];
 
-export interface ResultSearch {
+export interface IResultSearch {
   address_ids: [string]; // ??? not used, empty all the time
-  data: {
-    addresses: { [aid:string]: Address };
-    messages: { [mid:string]: Mail };
-    metadata: { [mid:string]: MailMetadata };
-    tags: { [tid:string]: Tag };
-    threads: { [mid:string]: MessageThread  };
-  }
+  data: IData
   message_ids: [string]; /// ??? not used, empty all the time,
   search_tag_ids: [string]; // ???
   search_terms: [string]; // terms of the search, default: "all:mail"
@@ -105,9 +108,9 @@ export interface ResultSearch {
    view_pairs: {}; // ???
 }
 
-export interface ServerResponse {
+export interface IServerResponse {
   command: string; // e.g. 'login'
   status: string; // 'error' or ?
   message: string;
-  result: ResultLogin | ResultSearch; // one of the subinterfaces
+  result: IResultLogin | IResultSearch; // one of the subinterfaces
 }
