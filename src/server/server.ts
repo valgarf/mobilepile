@@ -40,7 +40,7 @@ export class Server {
       .map(res => {
         var decoded: ServerInterfaces.ServerResponse
         try {
-          decoded = res.json() // if that works, login failed -> display message as failure
+          decoded = res.json()
         }
         catch (SyntaxError) {
           return res
