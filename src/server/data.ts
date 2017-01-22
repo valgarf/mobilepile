@@ -9,12 +9,32 @@ import * as Lib from '@root/lib'
 
 @Injectable()
 export class DataStore {
-  _data: ServerInterfaces.IData = {
+  private _data: ServerInterfaces.IData = {
     addresses: {},
     messages: {},
     metadata: {},
     tags: {},
     threads: {}
+  }
+
+  get addresses(): { [aid:string]: ServerInterfaces.IAddress } {
+    return this._data.addresses;
+  }
+
+  get messages(): { [mid:string]: ServerInterfaces.IMessage } {
+    return this._data.messages;
+  }
+
+  get metadata(): { [mid:string]: ServerInterfaces.IMessageMetadata } {
+    return this._data.metadata;
+  }
+
+  get tags(): { [aid:string]: ServerInterfaces.ITag } {
+    return this._data.tags;
+  }
+
+  get threads(): { [aid:string]: ServerInterfaces.IMessageThread } {
+    return this._data.threads;
   }
 
   updateData(newData: ServerInterfaces.IData) {

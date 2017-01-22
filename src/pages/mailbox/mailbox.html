@@ -9,10 +9,8 @@
 
 
 <ion-content>
-  Mails shall be here
   <ion-list>
-    <ion-item *ngFor='let mail of mails | async'>
-      {{mail}}
-    </ion-item>
+    <mail-info *ngFor='let mail of mails | async' [mid]=mail>
+    </mail-info>
   </ion-list>
 </ion-content>

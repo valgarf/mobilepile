@@ -10,7 +10,8 @@ import * as Server from '@root/server';
   declarations: [
     MyApp,
     Pages.LoginPage,
-    Pages.MailboxPage
+    Pages.MailboxPage,
+    Components.MailInfoComponent
   ],
   imports: [
     IonicModule.forRoot(MyApp)
@@ -24,7 +25,7 @@ import * as Server from '@root/server';
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
     Server.DataStore,
-    Server.Server,    
+    Server.Server,
     Components.MessageHandler
   ]
 })

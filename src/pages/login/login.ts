@@ -1,8 +1,8 @@
-import { Component } from '@angular/core';
+import {Component} from '@angular/core';
 
-import { NavController, ToastController } from 'ionic-angular';
+import {NavController} from 'ionic-angular';
 
-import { Server } from '@root/server'
+import {Server} from '@root/server'
 import * as Lib from '@root/lib'
 import * as Comp from '@root/components'
 
