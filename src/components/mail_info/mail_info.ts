@@ -17,11 +17,20 @@ export class MailInfoComponent {
   public name: string;
   public subject: string;
   public snippet: string;
+  public unread: boolean;
   public date: Date;
   public thread_length: number;
 
+
   public thread: Server.IMessageThread;
   public metadata: Server.IMessageMetadata;
+
+  constructor(private data: Server.DataStore) {
+  }
+
+  get threadID(): string {
+      return this._threadID
+  }
 
   @Input()
   set threadID(value: string) {
@@ -30,62 +39,56 @@ export class MailInfoComponent {
       if (this.thread) {
         this._mid = this.thread[0][0]
         this.metadata = this.data.metadata[this._mid]
-        this.thread_length = this.thread.length
       }
       else {
         this._mid = undefined
         this.metadata = undefined
       }
+      this.retrieveData()
+  }
 
-      if (this.metadata) {
-        this.name = this.metadata.from.fn
-        this.subject = this.metadata.subject
-        this.snippet = this.metadata.body.snippet
-        this.date = new Date(this.metadata.timestamp)
-      }
-      else {
-        this.name = undefined
-        this.subject = undefined
-        this.snippet = undefined
-        this.date = undefined
-      }
+  get mid(): string {
+      return this._mid
   }
 
   @Input()
   set mid(value: string) {
       this._mid = value
       this.metadata = this.data.metadata[this._mid]
-
       if (this.metadata) {
-        this.name = this.metadata.from.fn
-        this.subject = this.metadata.subject
-        this.snippet = this.metadata.body.snippet
-        this.date = new Date(this.metadata.timestamp)
         this._threadID = this.metadata.thread_mid
         this.thread = this.data.threads[this._threadID]
       }
       else {
-        this.name = undefined
-        this.subject = undefined
-        this.snippet = undefined
-        this.date = undefined
         this._threadID = undefined
         this.thread = undefined
       }
-
-      if (this.thread) {
-        this.thread_length = this.thread.length
-      }
-      else {
-        this.thread_length = undefined
-      }
+      this.retrieveData()
   }
 
-  get threadID(): string {
-      return this._threadID
-  }
-  constructor(private data: Server.DataStore) {
-    console.log(this.threadID)
+
+  private retrieveData() {
+    if (this.metadata) {
+      this.name = this.metadata.from.fn
+      this.subject = this.metadata.subject
+      this.snippet = this.metadata.body.snippet
+      this.date = new Date(this.metadata.timestamp)
+      this.unread = this.metadata.flags.unread
+    }
+    else {
+      this.name = undefined
+      this.subject = undefined
+      this.snippet = undefined
+      this.date = undefined
+      this.unread = undefined
+    }
+
+    if (this.thread) {
+      this.thread_length = this.thread.length
+    }
+    else {
+      this.thread_length = undefined
+    }
   }
 
 }

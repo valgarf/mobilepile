@@ -16,7 +16,7 @@ export class LoginPage {
   password: string = ''
   allowSubmission = true
 
-  constructor(public navCtrl: NavController, private msg: Comp.MessageHandler, private server: Server) {
+  constructor(public navCtrl: NavController, private server: Server) {
     Lib.bindMethods(this)
   }
 
@@ -34,7 +34,6 @@ export class LoginPage {
     let self = this
     this.server.url = this.url
     this.server.login(this.password)
-      .catch(this.msg.displayError)
       .then((() => {self.allowSubmission = true}))
   }
 

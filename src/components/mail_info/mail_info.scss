@@ -1,0 +1,40 @@
+
+mail-info {
+  .name {
+    font-size: $font-size-medium;
+    margin-bottom: 4pt;
+  }
+
+  .unread{
+    font-weight: bold;
+  }
+
+  .subject {
+    font-size: $font-size-small;
+    // height: (3*$font-size-small);
+    // word-wrap: break-word;
+    // width: 100%;
+  }
+
+  label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* number of lines to show */
+    line-height: (1.2*$font-size-small);        /* fallback */
+    max-height: (2.4*$font-size-small);       /* fallback */
+  }
+
+  .snippet {
+    font-size: $font-size-small;
+    color: $color-grey-text;
+  }
+
+  ion-item {
+    .label {
+      margin-top: 5pt;
+      margin-bottom: 5pt;
+    }
+  }
+}
