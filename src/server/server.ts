@@ -10,7 +10,7 @@ import {DataStore} from './data'
 
 @Injectable()
 export class Server {
-  url : string = "http://localhost:33411/"
+  url : string = "http://localhost:33411"
   api : string = "/api/0"
 
   jsonRequest: RequestOptions = new RequestOptions({ headers: new Headers({'Content-Type': 'application/json'}), withCredentials: true });

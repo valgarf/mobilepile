@@ -12,8 +12,8 @@ import * as Comp from '@root/components'
 })
 export class LoginPage {
 
-  url: string = ''
-  password: string = ''
+  url: string = 'http://localhost:33411'
+  password: string = 'testingonly'
   allowSubmission = true
 
   constructor(public navCtrl: NavController, private server: Server) {

@@ -2,6 +2,7 @@ import {Component, Input, Output, ChangeDetectionStrategy} from '@angular/core';
 import {NavController, ToastController} from 'ionic-angular';
 import {Observable, BehaviorSubject} from 'rxjs/Rx'
 
+import {dateFormat} from 'dateformat'
 import * as Server from '@root/server'
 import * as Lib from '@root/lib'
 import * as Comp from '@root/components'
@@ -26,6 +27,17 @@ export class MailInfoComponent {
   public metadata: Server.IMessageMetadata;
 
   constructor(private data: Server.DataStore) {
+  }
+
+  get dateFormatString(): string {
+    let now = new Date(Date.now())
+    if (now.getFullYear() != this.date.getFullYear()) {
+      return "dd.MM.yyyy";
+    }
+    if (now.getMonth() != this.date.getMonth() || now.getDate() != this.date.getDate()) {
+      return "dd. MMM";
+    }
+    return "H:mm";
   }
 
   get threadID(): string {
@@ -72,7 +84,7 @@ export class MailInfoComponent {
       this.name = this.metadata.from.fn
       this.subject = this.metadata.subject
       this.snippet = this.metadata.body.snippet
-      this.date = new Date(this.metadata.timestamp)
+      this.date = new Date(this.metadata.timestamp*1000)
       this.unread = this.metadata.flags.unread
     }
     else {

@@ -49,7 +49,7 @@ export interface IMessageMetadata {
   subject: string;
   tag_tids: [string];
   thread_mid: string; // ??? not quite sure yet.... maybe id of first message in thread? or id of the thread?
-  timestamp: number; // typical json format
+  timestamp: number; // typical json format, 10 digits (*1000 for milliseconds)
   to_aids: [string]; // receiver adresses
   urls: {
       source: string; //direct url to the message

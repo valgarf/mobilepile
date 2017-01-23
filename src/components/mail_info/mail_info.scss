@@ -5,7 +5,15 @@ mail-info {
     margin-bottom: 4pt;
   }
 
-  .unread{
+  ion-item.read {
+    background-color: $color-read;
+  }
+
+  ion-item.unread {
+    background-color: $color-new;
+  }
+
+  .name.unread {
     font-weight: bold;
   }
 
@@ -36,5 +44,17 @@ mail-info {
       margin-top: 5pt;
       margin-bottom: 5pt;
     }
+  }
+
+  .badge {
+    margin-left: 10pt;
+    background-color: $color-badge;
+    color: $color-badge-font;
+    font-weight: normal;
+  }
+
+  .date {
+    margin-left: auto;
+    font-weight: normal;
   }
 }

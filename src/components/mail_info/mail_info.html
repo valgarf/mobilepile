@@ -1,6 +1,7 @@
-<ion-item text-wrap>
-  <ion-row class='name' [ngClass]='unread ? "unread" : ""'>
-    {{name}}
+<ion-item text-wrap [ngClass]='{"unread": unread, "read": !unread}'>
+  <ion-row class='name' [ngClass]='{"unread": unread}'>
+    <span>{{name}}</span> <ion-badge class='badge' *ngIf='thread_length>1'>{{thread_length}}</ion-badge>
+    <span class='date'>{{date | date:dateFormatString}} </span>
   </ion-row>
   <ion-row class='subject'>
     <label>{{subject}} <span class='snippet'>{{snippet}}</span></label>
