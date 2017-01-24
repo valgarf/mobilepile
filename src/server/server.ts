@@ -17,6 +17,7 @@ export class Server {
   plainRequest: RequestOptions = new RequestOptions({ withCredentials: true });
 
   private _pulse: Observable<boolean>
+  private _lastPoll: number
 
   private _authenticated : BehaviorSubject<boolean> = new BehaviorSubject(false)
   get authenticated(): boolean {return this._authenticated.getValue()}
@@ -25,13 +26,11 @@ export class Server {
 
   constructor(private http: Http, private msg: MessageHandler, public data: DataStore) {
     Lib.bindMethods(this)
-    this._pulse = Observable.defer(this.createPulse)
+    let clock = Observable.timer(0, 5*60*1000)
+    this._pulse = Observable.combineLatest([clock, this.authenticatedObs], (i,v) => v).filter( v => v);
+    this._lastPoll = Date.now()/1000
+    this.poll()
   }
-
-  private createPulse(): Observable<boolean> {
-    return Observable.combineLatest([Observable.timer(0,5*60*1000), this.authenticatedObs], (i,v) => v).filter( v => v);
-  }
-
 
   login(pass : string): Promise<any> {
     let self = this
@@ -64,12 +63,42 @@ export class Server {
     return promise;
   }
 
+  poll() {
+    let self = this
+    // /api/0/eventlog/          [incomplete]/[wait]/[<count>]/[<field>=<val>/...]/
+                          // ?private_data=[var:value]&source=[source class]&flag=[require a flag]&flags=[match all flags]&event_id=[an event ID]&since=[wait for new data?]&data=[var:value]&incomplete=[incomplete events only?]&wait=[seconds to wait for new data]
+    let observable = Observable.interval(500) // check every 500ms if last poll finished
+        .filter((evt) => self.authenticated) // block polling if we are not authenticated
+        .map((r) => {console.log('poll'); return r;}) //DEBUG write to console to show that we are still alive
+        // .exhaustMap(() => {return this.http.get(this.url+this.api+'/eventlog/',  new RequestOptions({ withCredentials: true, search: body}))}) // exhaustMap: only poll if previous poll finished
+        .exhaustMap(() => {
+          let body = new URLSearchParams();
+          body.set('wait', '30');
+
+          body.set('since', self._lastPoll.toString());
+          console.log('Poll events')
+          return this.http.get(this.url+'/logs/events/as.json',  new RequestOptions({ withCredentials: true, search: body}))
+        }) // exhaustMap: only poll if previous poll finished
+        .catch( (err, obs) => {
+          console.log(err)
+          return obs
+        })
+        .map( (res) => res.json())
+        .do( (res) => {
+          let events = res.result.events
+          let last = events[events.length - 1]
+          let date = new Date(last.date)
+          this._lastPoll = date.valueOf()/1000
+        }).take(5)
+        .subscribe(Lib.logfunc)
+  }
+
   search(query: string = 'in:Inbox', order: string = 'rev-freshness'): Observable<ServerInterfaces.IResultSearch> {
     let self = this
     let body = new URLSearchParams();
     body.set('q', query);
     body.set('order', order);
-    return this._pulse.map( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body}))).exhaust()
+    return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
       .catch( (err, obs) => {
         // console.log('CONNECTION ERROR:', err)
         if (err.status == 0 || err.status == 403) {
