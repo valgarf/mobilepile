@@ -26,8 +26,11 @@ export class Server {
 
   constructor(private http: Http, private msg: MessageHandler, public data: DataStore) {
     Lib.bindMethods(this)
-    let clock = Observable.timer(0, 5*60*1000)
-    this._pulse = Observable.combineLatest([clock, this.authenticatedObs], (i,v) => v).filter( v => v);
+    let clock = Observable.timer(0, 20000).share() // hot observable
+    let evtstream = Observable.combineLatest([clock, this.authenticatedObs], (i,v) => v); // hot observable
+    let buffer = new BehaviorSubject(false) // make a cold observable out of a hot one
+    evtstream.subscribe(buffer)
+    this._pulse = buffer.filter( v => v)
     this._lastPoll = Date.now()/1000
     this.poll()
   }
@@ -51,6 +54,13 @@ export class Server {
         }
         catch (SyntaxError) {} // Syntax error means we got back HTML instead of JSON -> login worked
         self.authenticated = true
+        // --- test for correctly working pulse
+        // Observable.timer(10000).subscribe( () => {
+        //   console.log('subscribing')
+        //   self._pulse.subscribe(() => {
+        //     console.log("subscription called")
+        //   })
+        // })
         return res;
       })
       .catch( (err) => {
@@ -74,9 +84,8 @@ export class Server {
         .exhaustMap(() => {
           let body = new URLSearchParams();
           body.set('wait', '30');
-
           body.set('since', self._lastPoll.toString());
-          console.log('Poll events')
+          // console.log('Poll events')
           return this.http.get(this.url+'/logs/events/as.json',  new RequestOptions({ withCredentials: true, search: body}))
         }) // exhaustMap: only poll if previous poll finished
         .catch( (err, obs) => {
