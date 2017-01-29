@@ -13,9 +13,8 @@
     <mail-info *ngFor='let mail of mails | async' [mid]=mail>
     </mail-info>
   </ion-list>
-
-  <ion-infinite-scroll
-    on-infinite="loadMore()"
-    distance="10%">
+  <ion-infinite-scroll (ionInfinite)="loadMore($event)">
+    <ion-infinite-scroll-content loadingSpinner="bubbles" loadingText="Loading additional mails">
+    </ion-infinite-scroll-content>
   </ion-infinite-scroll>
 </ion-content>

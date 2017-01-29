@@ -102,11 +102,13 @@ export class Server {
         .subscribe(Lib.logfunc)
   }
 
-  search(query: string = 'in:Inbox', order: string = 'rev-freshness'): Observable<ServerInterfaces.IResultSearch> {
+  search(query: string = 'in:Inbox', order: string = 'rev-freshness', start:number = 0, end:number = 20): Observable<ServerInterfaces.IResultSearch> {
     let self = this
     let body = new URLSearchParams();
     body.set('q', query);
     body.set('order', order);
+    body.set('start', start.toString());
+    body.set('end', end.toString());
     return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
       .catch( (err, obs) => {
         // console.log('CONNECTION ERROR:', err)
@@ -120,7 +122,7 @@ export class Server {
       .map(res => <ServerInterfaces.IResultSearch>(res.result))
       .do(res => {
         this.data.updateData(res.data)
-        console.log('Query result:',res)
+        // console.log('Query result:',res)
       })
   }
 }

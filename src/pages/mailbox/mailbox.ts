@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { NavController, ToastController } from 'ionic-angular';
-import {Observable, BehaviorSubject} from 'rxjs/Rx'
+import {Observable, BehaviorSubject, AsyncSubject, Subject} from 'rxjs/Rx'
 
 import { Server } from '@root/server'
 import * as Lib from '@root/lib'
@@ -18,27 +18,50 @@ export class MailboxPage {
   set tag(value: string) {this._tag.next(value)}
   get tagObs(): Observable<string> {return this._tag}
 
+  private _end : number = 0
+  private _step: number = 20
+  private _obs: [Observable<[string]>] = <[Observable<[string]>]>[]
+
+  private _loadingSubject : Subject<Observable<[string]>> = new Subject<Observable<[string]>>()
   mails: Observable<[string]>
+
 
   constructor(public navCtrl: NavController, private server: Server, private msg: Comp.MessageHandler) {
     Lib.bindMethods(this)
+    var self = this
     server.authenticatedObs.subscribe( (res) => {
       if (res) {
         // this.mails = this.mails.retry()
-        this.mails = server.search()
-          .map(res => res.thread_ids)
-          .catch( (err) =>  {
-            if (err instanceof Error) {
-              this.msg.displayError(err)
-            }
-            return Observable.of([])
-          })
+        self.loadMore(null)
       }
     })
+
+    let tmpobs: Observable<[string]> = <Observable<[string]>> this._loadingSubject
+      .scan( (acc, cur) => Observable.combineLatest(acc, cur).map((arr) => arr[0].concat(arr[1])) )
+      // .scan( (acc, cur) => acc.withLatestFrom(acc).map((arr) => arr[1].concat(arr[0])) )
+      .switch()
+      // for some reason this fails the typescript
+
+    this.mails = tmpobs.catch( (err) =>  {
+        console.log("wtf")
+        if (err instanceof Error) {
+          this.msg.displayError(err)
+        }
+        return Observable.of([])
+      })
+      // .map( (lolomails) => [].concat.apply([],lolomails) )
+      .do(Lib.logfunc)
   }
 
-  loadMore() {
-    
+  loadMore(infiniteScroll) {
+    let newObs = this.server.search('in:Inbox', 'rev-freshness', this._end, this._end + this._step ).map(res => res.thread_ids)
+    this._loadingSubject.next(newObs)
+    this._end = this._end + this._step
+    newObs.first().subscribe( () => {
+      if (infiniteScroll) {
+        infiniteScroll.complete()
+      }
+    })
   }
 
 }
