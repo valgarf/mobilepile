@@ -125,4 +125,25 @@ export class Server {
         // console.log('Query result:',res)
       })
   }
+
+  getMessage(mid: string): Promise<ServerInterfaces.IResultSearch>{
+    var self = this
+    let body = new URLSearchParams();
+    body.set('mid', mid);
+    return this.http.get(this.url+this.api+'/message/', new RequestOptions({ withCredentials: true, search: body}))
+      .catch( (err, obs) => {
+        // console.log('CONNECTION ERROR:', err)
+        if (err.status == 0 || err.status == 403) {
+          self.authenticated = false;
+          return obs;
+        }
+        return Observable.throw(new Lib.ConnectionError(err.toString()));
+      })
+      .map(res => <ServerInterfaces.IServerResponse>res.json())
+      .map(res => <ServerInterfaces.IResultSearch>(res.result))
+      .do(res => {
+        this.data.updateData(res.data)
+        // console.log('Query result:',res)
+      }).toPromise()
+  }
 }

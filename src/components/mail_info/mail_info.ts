@@ -1,4 +1,4 @@
-import {Component, Input, Output, ChangeDetectionStrategy} from '@angular/core';
+import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
 import {NavController, ToastController} from 'ionic-angular';
 import {Observable, BehaviorSubject} from 'rxjs/Rx'
 
@@ -13,6 +13,8 @@ import * as Comp from '@root/components'
   // changeDetection:  ChangeDetectionStrategy.OnPush
 })
 export class MailInfoComponent {
+  @Output() open: EventEmitter<any> = new EventEmitter<any>();
+  
   private _threadID: string;
   private _mid: string;
   public name: string;

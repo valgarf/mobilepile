@@ -1,4 +1,4 @@
-<ion-item text-wrap [ngClass]='{"unread": unread, "read": !unread}'>
+<ion-item text-wrap [ngClass]='{"unread": unread, "read": !unread}' (click)="open.emit()">
   <ion-row class='name' [ngClass]='{"unread": unread}'>
     <span>{{name}}</span> <ion-badge class='badge' *ngIf='thread_length>1'>{{thread_length}}</ion-badge>
     <span class='date'>{{date | date:dateFormatString}} </span>

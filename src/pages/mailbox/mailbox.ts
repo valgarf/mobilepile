@@ -5,6 +5,7 @@ import {Observable, BehaviorSubject, AsyncSubject, Subject} from 'rxjs/Rx'
 import { Server } from '@root/server'
 import * as Lib from '@root/lib'
 import * as Comp from '@root/components'
+import {MailViewPage} from '../mailview/mailview'
 
 @Component({
   selector: 'page-mailbox',
@@ -62,6 +63,11 @@ export class MailboxPage {
         infiniteScroll.complete()
       }
     })
+  }
+
+  open(mail) {
+    this.navCtrl.push(MailViewPage, {mid: mail})
+    
   }
 
 }

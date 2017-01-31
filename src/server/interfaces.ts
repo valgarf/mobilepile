@@ -17,8 +17,35 @@ export interface IAddress {
   "x-mailpile-rid"?: string // "e65587ba592"
 }
 
-export interface IMessage {
+export interface IMessageCrypto {
 
+}
+
+export interface IMessageAttachment {
+
+}
+
+export interface IMessageHTML {
+
+}
+
+export interface IMessageTextCrypto {
+
+}
+
+export interface IMessageText {
+  charset: string;
+  crypto: IMessageTextCrypto;
+  data: string;
+  type: string;
+}
+
+export interface IMessage {
+  attachments: [IMessageAttachment]; //??
+  crypt: IMessageCrypto;
+  header_list: [[string, string]];
+  html_parts: [IMessageHTML];
+  text_parts: [IMessageText];
 }
 
 export interface IMessageMetadata {

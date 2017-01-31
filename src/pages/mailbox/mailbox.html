@@ -10,7 +10,7 @@
 
 <ion-content>
   <ion-list>
-    <mail-info *ngFor='let mail of mails | async' [mid]=mail>
+    <mail-info *ngFor='let mail of mails | async' [mid]=mail (open)="open(mail)">
     </mail-info>
   </ion-list>
   <ion-infinite-scroll (ionInfinite)="loadMore($event)">
