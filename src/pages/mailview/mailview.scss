@@ -1,17 +1,29 @@
 page-mailview {
+
   div.toolbar-title {
-    font-size: 1.4rem;
-    white-space: pre-wrap;
+    font-size: 12pt;
+    white-space: normal;
+    overflow-y: hidden;
+    position: absolute;
+    // height: $toolbar-height;
   }
+
+  div.toolbar-title-md {
+    height: $toolbar-md-height;
+  }
+  div.toolbar-title-ios {
+    height: $toolbar-ios-height;
+  }
+  div.toolbar-title-wp {
+    height: $toolbar-wp-height;
+  }
+
 
   div.text {
     white-space: pre-wrap;
     padding: 2pt;
   }
 
-  // .html {
-  //   overflow: scroll;
-  // }
   div.scroll-content {
     overflow: scroll;
   }
