@@ -26,7 +26,10 @@ export interface IMessageAttachment {
 }
 
 export interface IMessageHTML {
-
+  charset: string;
+  crypto: IMessageTextCrypto;
+  data: string;
+  type: string;
 }
 
 export interface IMessageTextCrypto {

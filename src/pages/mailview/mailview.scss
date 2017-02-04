@@ -1,6 +1,22 @@
 page-mailview {
-  .text {
+  div.toolbar-title {
+    font-size: 1.4rem;
+    white-space: pre-wrap;
+  }
+
+  div.text {
     white-space: pre-wrap;
     padding: 2pt;
+  }
+
+  // .html {
+  //   overflow: scroll;
+  // }
+  div.scroll-content {
+    overflow: scroll;
+  }
+
+  ion-content.content {
+    width: 100% !important;
   }
 }

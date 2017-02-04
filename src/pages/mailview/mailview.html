@@ -1,6 +1,6 @@
 <ion-header>
   <ion-navbar>
-    <ion-title>
+    <ion-title class="small-title">
       {{subject}}
     </ion-title>
   </ion-navbar>
@@ -9,5 +9,6 @@
 
 
 <ion-content>
-  <div class="text">{{content}}</div>
+  <div class="text" *ngIf="!show_html">{{content_text}}</div>
+  <div class="html" *ngIf="show_html" [innerHTML]="safe_html"></div>
 </ion-content>
