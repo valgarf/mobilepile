@@ -94,13 +94,13 @@ export interface ITag {
   display: string; //"tag" oder "invisible"
   icon: string; //icon name
   label: boolean;
-  // label_color: color; //string?
+  label_color: string; // annoying string names like '11-orange-red'... just WHY?
   name: string;
   parent: string; // ID of the parent tag (if no parent: "")
   search_terms: string; // search term, may contain yet to be resolved variables (e.g. "%(slug)" )
   slug: string;
   tid: string; // ID of this tag
-  type: string;
+  type: string; // e.g. 'mailbox' for an external mailsource
   url: string; //url on server (contains '/mailpile' link)
 }
 

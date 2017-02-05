@@ -1,5 +1,30 @@
 
 mail-info {
+  div.colorbar {
+    position: absolute;
+    left:0;
+    top:5%;
+    height: 90%;
+  }
+
+  .item-md {
+    div.colorbar {
+      width : 0.3*$item-md-padding-left;
+    }
+  }
+
+  .item-ios {
+    div.colorbar {
+      width : 0.3*$item-ios-padding-left;
+    }
+  }
+
+  .item-wp {
+    div.colorbar {
+      width : 0.3*$item-wp-padding-left;
+    }
+  }
+
   .name {
     font-size: $font-size-medium;
     margin-bottom: 4pt;

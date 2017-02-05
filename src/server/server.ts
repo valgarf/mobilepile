@@ -111,7 +111,7 @@ export class Server {
     body.set('end', end.toString());
     return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
       .catch( (err, obs) => {
-        // console.log('CONNECTION ERROR:', err)
+        console.log('CONNECTION ERROR:', err)
         if (err.status == 0 || err.status == 403) {
           self.authenticated = false;
           return obs;

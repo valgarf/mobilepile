@@ -14,7 +14,7 @@ import * as Comp from '@root/components'
 })
 export class MailInfoComponent {
   @Output() open: EventEmitter<any> = new EventEmitter<any>();
-  
+
   private _threadID: string;
   private _mid: string;
   public name: string;
@@ -23,7 +23,7 @@ export class MailInfoComponent {
   public unread: boolean;
   public date: Date;
   public thread_length: number;
-
+  public color: string;
 
   public thread: Server.IMessageThread;
   public metadata: Server.IMessageMetadata;
@@ -82,12 +82,19 @@ export class MailInfoComponent {
 
 
   private retrieveData() {
+    this.color = undefined
     if (this.metadata) {
       this.name = this.metadata.from.fn
       this.subject = this.metadata.subject
       this.snippet = this.metadata.body.snippet
       this.date = new Date(this.metadata.timestamp*1000)
       this.unread = this.metadata.flags.unread
+      for (let tid of this.metadata.tag_tids) {
+        let tag = this.data.tags[tid]
+        if (tag && tag.type=='mailbox'&& tag.parent=='') {
+          this.color = Server.str2color(tag.label_color)
+        }
+      }
     }
     else {
       this.name = undefined

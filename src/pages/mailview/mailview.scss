@@ -9,13 +9,13 @@ page-mailview {
   }
 
   div.toolbar-title-md {
-    height: $toolbar-md-height;
+    max-height: $toolbar-md-height;
   }
   div.toolbar-title-ios {
-    height: $toolbar-ios-height;
+    max-height: $toolbar-ios-height;
   }
   div.toolbar-title-wp {
-    height: $toolbar-wp-height;
+    max-height: $toolbar-wp-height;
   }
 
 
