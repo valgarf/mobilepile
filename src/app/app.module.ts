@@ -12,6 +12,7 @@ import * as Server from '@root/server';
     Pages.LoginPage,
     Pages.MailboxPage,
     Pages.MailViewPage,
+    Pages.TagmenuPage,
     Components.MailInfoComponent
   ],
   imports: [
@@ -22,7 +23,8 @@ import * as Server from '@root/server';
     MyApp,
     Pages.LoginPage,
     Pages.MailboxPage,
-    Pages.MailViewPage
+    Pages.MailViewPage,
+    Pages.TagmenuPage
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},

@@ -67,7 +67,7 @@ export class MailboxPage {
 
   open(mail) {
     this.navCtrl.push(MailViewPage, {mid: mail})
-    
+
   }
 
 }

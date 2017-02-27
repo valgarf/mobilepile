@@ -114,7 +114,8 @@ export class Server {
         console.log('CONNECTION ERROR:', err)
         if (err.status == 0 || err.status == 403) {
           self.authenticated = false;
-          return obs;
+          return obs.skip(1);
+          // return obs.skip(1);
         }
         return Observable.throw(new Lib.ConnectionError(err.toString()));
       })
