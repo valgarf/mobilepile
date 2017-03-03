@@ -1,10 +1,4 @@
 <ion-content>
-  <ion-list>
-    <button ion-item>
-      Login
-    </button>
-    <button ion-item>
-      Signup
-    </button>
-  </ion-list>
+  <taglist class='taglistRoot' *ngFor="let tags of tagsAll | async" [tags]="tags" [level]="0">
+  </taglist>
 </ion-content>

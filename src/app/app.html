@@ -1,3 +1,3 @@
 <!-- <page-tagmenu></page-tagmenu> -->
-<ion-menu [content]="rootNav"><page-tagmenu></page-tagmenu></ion-menu>
+<ion-menu [content]="rootNav" persistent><ion-nav #menuNav [root]="menuPage"></ion-nav></ion-menu>
 <ion-nav #rootNav [root]="rootPage"></ion-nav>

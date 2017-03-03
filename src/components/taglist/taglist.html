@@ -1,0 +1,12 @@
+<ion-list class="taglist">
+  <ion-item *ngFor="let tag of tags" [style.padding-left]="leftPadding">
+    <div class='arrow'>
+      <img class='arrow' [src]="getArrow(tag)" [style.visibility]="getVisibility(tag)" (click)="open(tag)"/>
+    </div>
+    <div class='icon'  [style.background-color]="getColor(tag)">
+      <img class='icon' [src]="getIcon(tag)"/>
+    </div>
+    <span class='tagname'>{{tag.name}}</span>
+    <taglist class='taglistDeeper' *ngIf="tag.open" [tags]="tag.children" [level]="level+1"></taglist>
+  </ion-item>
+</ion-list>

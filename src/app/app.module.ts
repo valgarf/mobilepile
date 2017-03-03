@@ -13,7 +13,8 @@ import * as Server from '@root/server';
     Pages.MailboxPage,
     Pages.MailViewPage,
     Pages.TagmenuPage,
-    Components.MailInfoComponent
+    Components.MailInfoComponent,
+    Components.TaglistComponent
   ],
   imports: [
     IonicModule.forRoot(MyApp)

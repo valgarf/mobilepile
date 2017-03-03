@@ -138,9 +138,13 @@ export interface IResultSearch {
    view_pairs: {}; // ???
 }
 
+export interface IResultTags {
+  tags: [ITag];
+}
+
 export interface IServerResponse {
   command: string; // e.g. 'login'
   status: string; // 'error' or ?
   message: string;
-  result: IResultLogin | IResultSearch; // one of the subinterfaces
+  result: IResultLogin | IResultSearch | IResultTags; // one of the subinterfaces
 }

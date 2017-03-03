@@ -35,6 +35,21 @@ export class Server {
     this.poll()
   }
 
+  handleErrors(obs: Observable<any>): Observable<any> {
+    let self=this;
+    return obs.retryWhen( (err) => {
+      console.log('CONNECTION ERROR:', err)
+//       if (err.status == 0 || err.status == 403) {
+        self.authenticated = false;
+//       }
+      return err.delay(1500) 
+    })
+//      .catch( (err, obs) => {
+//           console.log(err)
+//           return obs
+//         })
+  }
+  
   login(pass : string): Promise<any> {
     let self = this
     let body = new URLSearchParams();
@@ -88,10 +103,7 @@ export class Server {
           // console.log('Poll events')
           return this.http.get(this.url+'/logs/events/as.json',  new RequestOptions({ withCredentials: true, search: body}))
         }) // exhaustMap: only poll if previous poll finished
-        .catch( (err, obs) => {
-          console.log(err)
-          return obs
-        })
+        .let(self.handleErrors)
         .map( (res) => res.json())
         .do( (res) => {
           let events = res.result.events
@@ -110,21 +122,43 @@ export class Server {
     body.set('start', start.toString());
     body.set('end', end.toString());
     return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
-      .catch( (err, obs) => {
-        console.log('CONNECTION ERROR:', err)
-        if (err.status == 0 || err.status == 403) {
-          self.authenticated = false;
-          return obs.skip(1);
-          // return obs.skip(1);
-        }
-        return Observable.throw(new Lib.ConnectionError(err.toString()));
-      })
+      .let(self.handleErrors)
       .map(res => <ServerInterfaces.IServerResponse>res.json())
       .map(res => <ServerInterfaces.IResultSearch>(res.result))
+      .distinctUntilChanged()
       .do(res => {
         this.data.updateData(res.data)
         // console.log('Query result:',res)
       })
+  }
+  
+  tags(): Observable<ServerInterfaces.IResultTags> {
+    let self = this;
+    let result = this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/tags/', new RequestOptions({ withCredentials: true})))
+      .let(self.handleErrors)
+      .map(res => <ServerInterfaces.IServerResponse>res.json())
+      .map(res => <ServerInterfaces.IResultTags>(res.result))
+      .distinctUntilChanged()
+      .do(res => {
+        let tagData: ServerInterfaces.IData = {
+          addresses: {},
+          messages: {},
+          metadata: {},
+          tags: {},
+          threads: {}
+        }
+        for (let tag of res.tags) {
+          tagData.tags[tag.tid] = tag
+        }
+        this.data.updateData(tagData)
+      })
+    result.subscribe(Lib.logfunc);
+    return result
+//       .map(res => <ServerInterfaces.IResultSearch>(res.result))
+//       .do(res => {
+//         this.data.updateData(res.data)
+        // console.log('Query result:',res)
+//       })
   }
 
   getMessage(mid: string): Promise<ServerInterfaces.IResultSearch>{
@@ -132,14 +166,7 @@ export class Server {
     let body = new URLSearchParams();
     body.set('mid', mid);
     return this.http.get(this.url+this.api+'/message/', new RequestOptions({ withCredentials: true, search: body}))
-      .catch( (err, obs) => {
-        // console.log('CONNECTION ERROR:', err)
-        if (err.status == 0 || err.status == 403) {
-          self.authenticated = false;
-          return obs;
-        }
-        return Observable.throw(new Lib.ConnectionError(err.toString()));
-      })
+      .let(self.handleErrors)
       .map(res => <ServerInterfaces.IServerResponse>res.json())
       .map(res => <ServerInterfaces.IResultSearch>(res.result))
       .do(res => {
