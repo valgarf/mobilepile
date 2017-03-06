@@ -6,7 +6,7 @@
     <div class='icon'  [style.background-color]="getColor(tag)">
       <img class='icon' [src]="getIcon(tag)"/>
     </div>
-    <span class='tagname'>{{tag.name}}</span>
-    <taglist class='taglistDeeper' *ngIf="tag.open" [tags]="tag.children" [level]="level+1"></taglist>
+    <span class='tagname' (click)="select.emit(tag)">{{tag.name}}</span>
+    <taglist class='taglistDeeper' *ngIf="tag.open" [tags]="tag.children" [level]="level+1" (select)="select.emit($event)"></taglist>
   </ion-item>
 </ion-list>

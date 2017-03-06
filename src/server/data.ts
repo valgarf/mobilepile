@@ -16,6 +16,10 @@ export class DataStore {
     tags: {},
     threads: {}
   }
+  
+  constructor() {
+    Lib.bindMethods(this)
+  }
 
   get addresses(): { [aid:string]: ServerInterfaces.IAddress } {
     return this._data.addresses;
@@ -38,6 +42,9 @@ export class DataStore {
   }
 
   updateData(newData: ServerInterfaces.IData) {
+    if (newData == null || newData == undefined) {
+      return
+    }
     for (let key in this._data) {
      if (this._data.hasOwnProperty(key) && newData.hasOwnProperty(key)) {
        let cur = this._data[key]

@@ -1,5 +1,5 @@
 import { Component, ChangeDetectionStrategy } from '@angular/core';
-import { NavController, ToastController } from 'ionic-angular';
+import { NavController, NavParams, ToastController } from 'ionic-angular';
 import {Observable, BehaviorSubject, AsyncSubject, Subject} from 'rxjs/Rx'
 
 import { Server } from '@root/server'
@@ -19,17 +19,19 @@ export class MailboxPage {
   set tag(value: string) {this._tag.next(value)}
   get tagObs(): Observable<string> {return this._tag}
 
+  private _search: string
   private _end : number = 0
   private _step: number = 20
   private _obs: [Observable<[string]>] = <[Observable<[string]>]>[]
-
+  
   private _loadingSubject : Subject<Observable<[string]>> = new Subject<Observable<[string]>>()
   mails: Observable<[string]>
 
 
-  constructor(public navCtrl: NavController, private server: Server, private msg: Comp.MessageHandler) {
+  constructor(public navCtrl: NavController, private navParams: NavParams, private server: Server, private msg: Comp.MessageHandler) {
     Lib.bindMethods(this)
     var self = this
+    this._search = navParams.get('search') || 'in:Inbox';
     server.authenticatedObs.subscribe( (res) => {
       if (res) {
         // this.mails = this.mails.retry()
@@ -44,7 +46,6 @@ export class MailboxPage {
       // for some reason this fails the typescript
 
     this.mails = tmpobs.catch( (err) =>  {
-        console.log("wtf")
         if (err instanceof Error) {
           this.msg.displayError(err)
         }
@@ -55,7 +56,7 @@ export class MailboxPage {
   }
 
   loadMore(infiniteScroll) {
-    let newObs = this.server.search('in:Inbox', 'rev-freshness', this._end, this._end + this._step ).map(res => res.thread_ids)
+    let newObs = this.server.search(this._search, 'rev-freshness', this._end, this._end + this._step ).map(res => res.thread_ids)
     this._loadingSubject.next(newObs)
     this._end = this._end + this._step
     newObs.first().subscribe( () => {

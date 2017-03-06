@@ -1,4 +1,4 @@
-import {Component, Input} from '@angular/core';
+import {Component, Input, Output, EventEmitter} from '@angular/core';
 
 import {NavController} from 'ionic-angular';
 
@@ -21,6 +21,7 @@ export interface ITagTree extends ITag {
 export class TaglistComponent{
   @Input() tags: ITagTree[];
   @Input() level: number;
+  @Output() select: EventEmitter<ITagTree> = new EventEmitter<ITagTree>();
   
   constructor() {
   }

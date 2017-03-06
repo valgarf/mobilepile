@@ -1,4 +1,4 @@
 <ion-content>
-  <taglist class='taglistRoot' *ngFor="let tags of tagsAll | async" [tags]="tags" [level]="0">
+  <taglist class='taglistRoot' *ngFor="let tags of tagsAll | async" [tags]="tags" [level]="0" (select)="onSelect($event)">
   </taglist>
 </ion-content>
