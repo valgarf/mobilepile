@@ -1,7 +1,7 @@
 
 import {Observable, BehaviorSubject} from 'rxjs/Rx'
 import {Injectable} from '@angular/core'
-import {Http, Headers, RequestOptions, URLSearchParams} from '@angular/http'
+import {Http, Response, Headers, RequestOptions, URLSearchParams} from '@angular/http'
 import {MessageHandler} from '@root/components'
 
 import * as ServerInterfaces from './interfaces'
@@ -22,7 +22,7 @@ export class Server {
   private _authenticated : BehaviorSubject<boolean> = new BehaviorSubject(false)
   get authenticated(): boolean {return this._authenticated.getValue()}
   set authenticated(value: boolean) {this._authenticated.next(value)}
-  get authenticatedObs(): Observable<boolean> {return this._authenticated.distinct()}
+  get authenticatedObs(): Observable<boolean> {return this._authenticated.distinctUntilChanged()}
 
   constructor(private http: Http, private msg: MessageHandler, public data: DataStore) {
     Lib.bindMethods(this)
@@ -35,28 +35,12 @@ export class Server {
     this.poll()
   }
 
-  handleErrors(obs: Observable<any>): Observable<any> {
-    let self=this;
-    return obs.retryWhen( (err) => {
-      console.log('CONNECTION ERROR:', err)
-//       if (err.status == 0 || err.status == 403) {
-        self.authenticated = false;
-//       }
-      return err.delay(1500) 
-    })
-//      .catch( (err, obs) => {
-//           console.log(err)
-//           return obs
-//         })
-  }
-  
   login(pass : string): Promise<any> {
     let self = this
     let body = new URLSearchParams();
     body.set('pass', pass);
     let promise = this.http.post(this.url+this.api+'/auth/login/', body, this.plainRequest)
       .catch( (err) => {
-        // console.log('CONNECTION ERROR:', err)
         return Observable.throw(new Lib.ConnectionError(err.toString()));
       })
       .map(res => {
@@ -90,8 +74,6 @@ export class Server {
 
   poll() {
     let self = this
-    // /api/0/eventlog/          [incomplete]/[wait]/[<count>]/[<field>=<val>/...]/
-                          // ?private_data=[var:value]&source=[source class]&flag=[require a flag]&flags=[match all flags]&event_id=[an event ID]&since=[wait for new data?]&data=[var:value]&incomplete=[incomplete events only?]&wait=[seconds to wait for new data]
     let observable = Observable.interval(500) // check every 500ms if last poll finished
         .filter((evt) => self.authenticated) // block polling if we are not authenticated
         .map((r) => {console.log('poll'); return r;}) //DEBUG write to console to show that we are still alive
@@ -103,7 +85,7 @@ export class Server {
           // console.log('Poll events')
           return this.http.get(this.url+'/logs/events/as.json',  new RequestOptions({ withCredentials: true, search: body}))
         }) // exhaustMap: only poll if previous poll finished
-        .let(self.handleErrors)
+        .let(self._handleConnectionError)
         .map( (res) => res.json())
         .do( (res) => {
           let events = res.result.events
@@ -114,6 +96,31 @@ export class Server {
         .subscribe(Lib.logfunc)
   }
 
+  _handleConnectionError(obs: Observable<Response>): Observable<Response> {
+    let self = this
+    return obs.catch( (err, obs) => {
+      // console.log('CONNECTION ERROR:', err)
+      if (err.status == 0 || err.status == 403) {
+        self.authenticated = false;
+        return obs;
+      }
+      return Observable.throw(new Lib.ConnectionError(err.toString()));
+    })
+    // .retryWhen( errors => self._pulse)
+    // .retryWhen( errors => return errors.delay(1500))
+  }
+
+  _handleSearch(obs: Observable<Response>): Observable<ServerInterfaces.IResultSearch> {
+    let self = this
+    return obs.let(this._handleConnectionError)
+    .map(res => <ServerInterfaces.IServerResponse>res.json())
+    .map(res => <ServerInterfaces.IResultSearch>(res.result))
+    .do(res => {
+      self.data.updateData(res.data)
+      // console.log('Query result:',res)
+    })
+  }
+
   search(query: string = 'in:Inbox', order: string = 'rev-freshness', start:number = 0, end:number = 20): Observable<ServerInterfaces.IResultSearch> {
     let self = this
     let body = new URLSearchParams();
@@ -122,20 +129,13 @@ export class Server {
     body.set('start', start.toString());
     body.set('end', end.toString());
     return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
-      .let(self.handleErrors)
-      .map(res => <ServerInterfaces.IServerResponse>res.json())
-      .map(res => <ServerInterfaces.IResultSearch>(res.result))
-      .distinctUntilChanged()
-      .do(res => {
-        this.data.updateData(res.data)
-        // console.log('Query result:',res)
-      })
+      .let(this._handleSearch)
   }
-  
+
   tags(): Observable<ServerInterfaces.IResultTags> {
     let self = this;
     let result = this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/tags/', new RequestOptions({ withCredentials: true})))
-      .let(self.handleErrors)
+      .let(self._handleConnectionError)
       .map(res => <ServerInterfaces.IServerResponse>res.json())
       .map(res => <ServerInterfaces.IResultTags>(res.result))
       .distinctUntilChanged()
@@ -166,12 +166,7 @@ export class Server {
     let body = new URLSearchParams();
     body.set('mid', mid);
     return this.http.get(this.url+this.api+'/message/', new RequestOptions({ withCredentials: true, search: body}))
-      .let(self.handleErrors)
-      .map(res => <ServerInterfaces.IServerResponse>res.json())
-      .map(res => <ServerInterfaces.IResultSearch>(res.result))
-      .do(res => {
-        this.data.updateData(res.data)
-        // console.log('Query result:',res)
-      }).toPromise()
+      .let(this._handleSearch)
+      .toPromise()
   }
 }
