@@ -12,12 +12,14 @@ import * as Comp from '@root/components'
 })
 export class LoginPage {
 
-  url: string = 'http://localhost:33411'
-  password: string = 'testingonly'
+  url: string = ''; //'http://localhost:33411'
+  password: string = ''; //'testingonly'
   allowSubmission = true
 
   constructor(public navCtrl: NavController, private server: Server) {
     Lib.bindMethods(this)
+    this.url=server.url
+    this.password=server.password
   }
 
   ionViewCanLeave(): boolean {
@@ -33,7 +35,8 @@ export class LoginPage {
     // console.log('LOGIN', this.url, this.password)
     let self = this
     this.server.url = this.url
-    this.server.login(this.password)
+    this.server.password = this.password
+    this.server.login()
       .then((() => {self.allowSubmission = true}))
   }
 

@@ -16,7 +16,7 @@ export class DataStore {
     tags: {},
     threads: {}
   }
-  
+
   constructor() {
     Lib.bindMethods(this)
   }
@@ -54,6 +54,7 @@ export class DataStore {
        }
      }
    }
+   console.log('NEW DATA:',this._data)
  }
 
 

@@ -1,6 +1,6 @@
 import {Component} from '@angular/core';
 
-import {App, NavController} from 'ionic-angular';
+import {MenuController, NavController} from 'ionic-angular';
 
 import {Observable} from 'rxjs/Rx'
 import {sprintf} from 'sprintf-js'
@@ -20,10 +20,8 @@ export class TagmenuPage {
   tagsTree: Observable<Comp.ITagTree[]>;
   tagsAll: Observable<Comp.ITagTree[][]>;
   previousTags: { [tid: string]: Comp.ITagTree } = undefined;
-  private navCtrl: NavController;
-  constructor(public appCtrl: App, private server: Server, private data: DataStore) {
+  constructor(public menuCtrl: MenuController, private server: Server, private data: DataStore) {
     Lib.bindMethods(this)
-    this.navCtrl = appCtrl.getRootNav()
     this.tags = server.tags().map(res => res.tags)
     this.tagsTree = this.tags.map( tags => tags.filter( tag => tag.display!="invisible" ) ).map(this.createTagTree)
     this.tagsAll = this.tagsTree.map( tags => [tags.filter( tag => tag.display=="priority" ), tags.filter( tag => tag.display=="tag" )] );
@@ -43,12 +41,12 @@ export class TagmenuPage {
       }
     }
     let rootTags = <Comp.ITagTree[]>tags.filter( tag => tag.parent == "" )
-    console.log(rootTags)
     return rootTags
   }
 
   onSelect(tag: Comp.ITagTree) {
-    this.navCtrl.setRoot(MailboxPage, {search: sprintf(tag.search_terms, tag)})
-    this.navCtrl.popToRoot()
+    let navCtrl = <NavController>this.menuCtrl.get().content
+    navCtrl.setRoot(MailboxPage, {search: sprintf(tag.search_terms, tag)})
+    //navCtrl.popToRoot()
   }
 }

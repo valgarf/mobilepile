@@ -10,7 +10,8 @@ import {DataStore} from './data'
 
 @Injectable()
 export class Server {
-  url : string = "http://localhost:33411"
+  url: string = ""; //"http://localhost:33411"
+  password: string = "";
   api : string = "/api/0"
 
   jsonRequest: RequestOptions = new RequestOptions({ headers: new Headers({'Content-Type': 'application/json'}), withCredentials: true });
@@ -32,13 +33,13 @@ export class Server {
     evtstream.subscribe(buffer)
     this._pulse = buffer.filter( v => v)
     this._lastPoll = Date.now()/1000
-    this.poll()
+    // this.poll()
   }
 
-  login(pass : string): Promise<any> {
+  login(): Promise<any> {
     let self = this
     let body = new URLSearchParams();
-    body.set('pass', pass);
+    body.set('pass', this.password);
     let promise = this.http.post(this.url+this.api+'/auth/login/', body, this.plainRequest)
       .catch( (err) => {
         return Observable.throw(new Lib.ConnectionError(err.toString()));
@@ -129,7 +130,7 @@ export class Server {
     body.set('start', start.toString());
     body.set('end', end.toString());
     return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
-      .let(this._handleSearch)
+      .let(this._handleSearch).do((data) => Lib.logfunc('search results:',data) )
   }
 
   tags(): Observable<ServerInterfaces.IResultTags> {
@@ -152,7 +153,7 @@ export class Server {
         }
         this.data.updateData(tagData)
       })
-    result.subscribe(Lib.logfunc);
+    result.subscribe((data) => Lib.logfunc('tag data:',data) )
     return result
 //       .map(res => <ServerInterfaces.IResultSearch>(res.result))
 //       .do(res => {
