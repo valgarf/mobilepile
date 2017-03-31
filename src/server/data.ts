@@ -54,7 +54,7 @@ export class DataStore {
        }
      }
    }
-   console.log('NEW DATA:',this._data)
+  //  console.log('NEW DATA:',this._data)
  }
 
 

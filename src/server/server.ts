@@ -4,6 +4,9 @@ import {Injectable} from '@angular/core'
 import {Http, Response, Headers, RequestOptions, URLSearchParams} from '@angular/http'
 import {MessageHandler} from '@root/components'
 
+import {observable} from 'mobx'
+import {toStream} from 'mobx-utils'
+
 import * as ServerInterfaces from './interfaces'
 import * as Lib from '@root/lib'
 import {DataStore} from './data'
@@ -20,13 +23,18 @@ export class Server {
   private _pulse: Observable<boolean>
   private _lastPoll: number
 
-  private _authenticated : BehaviorSubject<boolean> = new BehaviorSubject(false)
-  get authenticated(): boolean {return this._authenticated.getValue()}
-  set authenticated(value: boolean) {this._authenticated.next(value)}
-  get authenticatedObs(): Observable<boolean> {return this._authenticated.distinctUntilChanged()}
-
+  // private _authenticated : BehaviorSubject<boolean> = new BehaviorSubject(false)
+  // get authenticated(): boolean {return this._authenticated.getValue()}
+  // set authenticated(value: boolean) {this._authenticated.next(value)}
+  // get authenticatedObs(): Observable<boolean> {return this._authenticated.distinctUntilChanged()}
+  @observable authenticated: boolean = false;
+  authenticatedObs: BehaviorSubject<boolean>;
   constructor(private http: Http, private msg: MessageHandler, public data: DataStore) {
     Lib.bindMethods(this)
+    let self = this
+    this.authenticatedObs = new BehaviorSubject(false);
+    Observable.from(toStream(() => self.authenticated)).subscribe(this.authenticatedObs)
+
     let clock = Observable.timer(0, 20000).share() // hot observable
     let evtstream = Observable.combineLatest([clock, this.authenticatedObs], (i,v) => v); // hot observable
     let buffer = new BehaviorSubject(false) // make a cold observable out of a hot one
@@ -130,7 +138,8 @@ export class Server {
     body.set('start', start.toString());
     body.set('end', end.toString());
     return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
-      .let(this._handleSearch).do((data) => Lib.logfunc('search results:',data) )
+      .let(this._handleSearch)
+      // .do((data) => Lib.logfunc('search results:',data) )
   }
 
   tags(): Observable<ServerInterfaces.IResultTags> {
@@ -153,7 +162,7 @@ export class Server {
         }
         this.data.updateData(tagData)
       })
-    result.subscribe((data) => Lib.logfunc('tag data:',data) )
+    // result.subscribe((data) => Lib.logfunc('tag data:',data) )
     return result
 //       .map(res => <ServerInterfaces.IResultSearch>(res.result))
 //       .do(res => {

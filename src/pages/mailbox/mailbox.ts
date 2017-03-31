@@ -32,30 +32,26 @@ export class MailboxPage {
     Lib.bindMethods(this)
     var self = this
     this._search = navParams.get('search') || 'in:Inbox';
-    console.log('Opening Mailbox with:',this._search)
 
     this._tag = new BehaviorSubject('Inbox')
     this._loadingSubject = new BehaviorSubject<Observable<[string]>>(Observable.of(<[string]>[]))
 
     let tmpobs: Observable<[string]> = <Observable<[string]>> this._loadingSubject
       .scan( (acc, cur) => Observable.combineLatest(acc, cur).map((arr) => arr[0].concat(arr[1])) )
-      .do(Lib.logfunc)
+      // .do(Lib.logfunc)
       // .scan( (acc, cur) => acc.withLatestFrom(acc).map((arr) => arr[1].concat(arr[0])) )
       .switch();
       // for some reason this fails the typescript
 
 
     this.mails = tmpobs.do(Lib.logfunc).catch( (err) =>  {
-        console.log('ERROR:' ,err)
         if (err instanceof Error) {
           this.msg.displayError(err)
         }
         return Observable.of([])
       })
       // .map( (lolomails) => [].concat.apply([],lolomails) )
-      .do(Lib.logfunc)
-
-    console.log('Mailbox init 50 %')
+      // .do(Lib.logfunc)
 
     server.authenticatedObs.subscribe( (res) => {
       if (res) {
@@ -64,12 +60,9 @@ export class MailboxPage {
       }
     })
 
-
-    console.log('Mailbox observables set up')
   }
 
   loadMore(infiniteScroll) {
-    console.log('loading more...')
     let newObs = this.server.search(this._search, 'rev-freshness', this._end, this._end + this._step ).map(res => res.thread_ids)
     // let newObs = this.server.search(this._search, 'rev-freshness', 0, this._end + this._step ).map(res => res.thread_ids)
     this._loadingSubject.next(newObs)
@@ -77,13 +70,10 @@ export class MailboxPage {
     newObs.first().subscribe( (el) => {
       if (infiniteScroll) {
         infiniteScroll.complete()
-        console.log('loading more completed')
       }
       else{
-        console.log('initial loading completed', el)
       }
     })
-    console.log('loading observables set up')
   }
 
   open(mail) {

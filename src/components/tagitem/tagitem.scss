@@ -1,0 +1,22 @@
+tagitem {
+  div.icon {
+    vertical-align: middle;
+    display: inline-block;
+  }
+  img.icon{
+    position: relative;
+  }
+
+  div.arrow {
+    vertical-align: middle;
+    display: inline-block;
+  }
+  img.arrow{
+    background-color: #dedede;
+    position: relative;
+  }
+
+  span.tagname {
+    vertical-align: middle;
+  }
+}

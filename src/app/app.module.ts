@@ -1,10 +1,12 @@
 import { NgModule, ErrorHandler } from '@angular/core';
 import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
 import { MyApp } from './app.component';
+import { MobxAngularModule } from 'mobx-angular';
 
 import * as Pages from '@root/pages';
 import * as Components from '@root/components'
-import * as Server from '@root/server';
+import { DataStore, Server } from '@root/server';
+import { Store } from '@root/store'
 
 @NgModule({
   declarations: [
@@ -14,10 +16,11 @@ import * as Server from '@root/server';
     Pages.MailViewPage,
     Pages.TagmenuPage,
     Components.MailInfoComponent,
-    Components.TaglistComponent
+    Components.TagitemComponent
   ],
   imports: [
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    MobxAngularModule
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -29,9 +32,10 @@ import * as Server from '@root/server';
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    Server.DataStore,
-    Server.Server,
-    Components.MessageHandler
+    DataStore,
+    Components.MessageHandler,
+    Server,
+    Store,
   ]
 })
 export class AppModule {}

@@ -1,13 +1,14 @@
 import {Component} from '@angular/core';
-
 import {MenuController, NavController} from 'ionic-angular';
 
 import {Observable} from 'rxjs/Rx'
+import {observable, computed} from 'mobx'
 import {sprintf} from 'sprintf-js'
 
 import {Server, DataStore, ITag, str2color} from '@root/server'
 import * as Lib from '@root/lib'
 import * as Comp from '@root/components'
+import {Store, Tag, TagDisplayType} from '@root/store'
 import {MailboxPage} from '../mailbox/mailbox'
 
 @Component({
@@ -20,7 +21,16 @@ export class TagmenuPage {
   tagsTree: Observable<Comp.ITagTree[]>;
   tagsAll: Observable<Comp.ITagTree[][]>;
   previousTags: { [tid: string]: Comp.ITagTree } = undefined;
-  constructor(public menuCtrl: MenuController, private server: Server, private data: DataStore) {
+
+  @computed get tagsCombined() {
+    let tags = this.store.tags.root.filter( (t) => t.visible )
+    return [
+      tags.filter( (t)=> t.display == TagDisplayType.priority ),
+      tags.filter( (t)=> t.display != TagDisplayType.priority )
+    ]
+  }
+
+  constructor(public menuCtrl: MenuController, private server: Server, private data: DataStore, private store: Store) {
     Lib.bindMethods(this)
     this.tags = server.tags().map(res => res.tags)
     this.tagsTree = this.tags.map( tags => tags.filter( tag => tag.display!="invisible" ) ).map(this.createTagTree)
