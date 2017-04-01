@@ -1,10 +1,12 @@
-<ion-item text-wrap [ngClass]='{"unread": unread, "read": !unread}' (click)="open.emit()">
-  <div class='colorbar' *ngIf='color' [style.background-color]="color"></div>
-  <ion-row class='name' [ngClass]='{"unread": unread}'>
-    <span>{{name}}</span> <ion-badge class='badge' *ngIf='thread_length>1'>{{thread_length}}</ion-badge>
-    <span class='date'>{{date | date:dateFormatString}} </span>
-  </ion-row>
-  <ion-row class='subject'>
-    <label>{{subject}} <span class='snippet'>{{snippet}}</span></label>
-  </ion-row>
-</ion-item>
+<div *mobxAutorun>
+  <ion-item text-wrap [ngClass]='{"unread": !this.message.read, "read": this.message.read}' (click)="open.emit()">
+    <div class='colorbar' *ngIf='this.color' [style.background-color]="this.color"></div>
+    <ion-row class='name' [ngClass]='{"unread": !this.message.read}'>
+      <span>{{this.message.from.name}}</span> <ion-badge class='badge' *ngIf='this.thread_length>1'>{{this.thread_length}}</ion-badge>
+      <span class='date'>{{this.message.timestamp | date:this.dateFormatString}} </span>
+    </ion-row>
+    <ion-row class='subject'>
+      <label>{{this.message.subject}} <span class='snippet'>{{this.message.snippet}}</span></label>
+    </ion-row>
+  </ion-item>
+</div>

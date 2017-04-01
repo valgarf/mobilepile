@@ -29,9 +29,9 @@ export class Store {
 
   updateStore(data: IData) {
     this.addresses.update(data.addresses)
+    this.tags.update(data.tags)
     this.messages.update(data.metadata)
     this.messages.update(data.messages)
-    console.log('Threads:',data.threads)
     this.threads.update(data.threads)
   }
 }

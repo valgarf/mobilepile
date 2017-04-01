@@ -31,13 +31,13 @@ export class MessageManager {
   }
 }
 
-class MessagePart {
+export class MessagePart {
   constructor(public charset: string, public data: string, public type: string){
   }
 }
 
-class MessagePartHTML extends MessagePart {}
-class MessagePartText extends MessagePart {}
+export class MessagePartHTML extends MessagePart {}
+export class MessagePartText extends MessagePart {}
 
 function TypeGuardIMessage(arg: any): arg is Server.IMessage {
   return arg.text_parts !== undefined

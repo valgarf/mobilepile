@@ -1,50 +1,52 @@
-import { observable, computed, autorun, action } from 'mobx'
+import { observable, computed, autorun, action, ObservableMap } from 'mobx'
 import * as Server from '@root/server'
 import {Store} from './store'
 
 export class TagManager {
-  @observable all: Tag[] = [];
+  @observable all: ObservableMap<Tag> = new ObservableMap<Tag>();
+  @observable sortedIDs: string[] = []
+  @computed get sorted(): Tag[] {
+    return this.sortedIDs.map( id => this.getByID(id))
+  }
   @computed get root():Tag[] {
-    return this.all.filter( tag => tag.is_root )
+    return this.sorted.filter( tag => tag.is_root )
   }
 
   constructor(public store: Store) {
-    // autorun( () => {
-    //   console.log("MOBX TAGS:", self.root.filter((tag) => tag.visible ))
-    // })
+    autorun( () => {
+      console.log("MOBX TAGS:", this.root.filter((tag) => tag.visible ))
+    })
   }
 
   public getByID(id: string): Tag {
-    return this.all.find( (tag) => tag.ID == id)
+    return this.all.get(id)
   }
 
-  @action public update(taglist: Server.ITag[]) {
-    let tmplist = []
-    let tmpmap = {}
-    for (let tag of taglist) {
+
+  @action public update(taglist: Server.ITag[] | {[tid:string]: Server.ITag}) {
+    let updateTag = ( tag: Server.ITag) => {
       let tagobj = this.getByID(tag.tid)
       if (tagobj == null) {
         tagobj = new Tag(tag.tid, this)
+        this.all.set(tag.tid, tagobj)
       }
       tagobj.update(tag)
-      tagobj.children = []
-      tmplist.push(tagobj)
-      tmpmap[tagobj.ID] = tagobj
     }
-    for (let tag of tmplist) {
-      if (tag.parentID != "") {
-        tag.parent = tmpmap[tag.parentID]
-        tag.parent.children.push(tag)
+
+    if (Array.isArray(taglist)) {
+      for (let tag of taglist) {
+        updateTag(tag)
       }
+      (this.sortedIDs as any).replace( taglist.map( tag => tag.tid) )
     }
-    if ((this.all as any).peek() != tmplist) {
-      (this.all as any).replace(tmplist) //no types for mobx
+    else {
+        Object.keys(taglist).forEach( id => updateTag(taglist[id]) )
     }
   }
 }
 
 
-// export enum TagType { Mailbox, Tag}
+// export enum TagType { mailbox, tag, tagged, profile, blank, ham, attribute, forwarded, inbox, read, unread, replied, drafts, outbox}
 export enum TagDisplayType {invisible, priority, tag}
 export class Tag {
 
@@ -53,16 +55,20 @@ export class Tag {
   @observable label: boolean = true; // wether ot not a label is shown
   @observable label_color: string = '#ff0000'; // color of the label in HTML format
   @observable name: string = '';
-  @observable parent: Tag = null;
   @observable parentID: string = "";
   @observable search_terms: string = '';
   @observable slug: string = '';
-  @observable children: Tag[] = [];
   @observable open: boolean = false; //wether or not this tag is currently opened in the UI. Move to some UI state?
-  // @observable type: TagType;
+  @observable type: string; //enum is too much hassle
 
+  @computed get parent(): Tag {
+    return this.manager.getByID(this.parentID)
+  }
+  @computed get children(): Tag[] {
+    return this.manager.sorted.filter( child => child.parentID == this.ID )
+  };
   @computed get is_root(): boolean {
-    return this.parent == null;
+    return this.parentID == "";
   }
   @computed get visible(): boolean {
     return this.display != TagDisplayType.invisible;
@@ -70,6 +76,9 @@ export class Tag {
   @computed get search_expression(): string {
     return sprintf(this.search_terms, {slug: this.slug})
   };
+  @computed get is_mailbox(): boolean {
+    return this.type == "mailbox"
+  }
 
   constructor(public ID: string, private manager: TagManager) {
   }
@@ -79,8 +88,26 @@ export class Tag {
       case 'invisible': this.display=TagDisplayType.invisible; break;
       case 'priority': this.display=TagDisplayType.priority; break;
       case 'tag': this.display=TagDisplayType.tag; break;
-      default: throw new Error();
+      default: throw new Error("Tag Display Type not implemented:" + tag.display);
     }
+    // switch(tag.type) {
+    //   case 'mailbox': this.type=TagType.mailbox; break;
+    //   case 'tag': this.type=TagType.tag; break;
+    //   case 'profile': this.type=TagType.profile; break;
+    //   case 'blank': this.type=TagType.blank; break;
+    //   case 'ham': this.type=TagType.ham; break;
+    //   case 'attribute': this.type=TagType.attribute; break;
+    //   case 'fwded': this.type=TagType.forwarded; break;
+    //   case 'inbox': this.type=TagType.inbox; break;
+    //   case 'read': this.type=TagType.read; break;
+    //   case 'unread': this.type=TagType.unread; break;
+    //   case 'replied': this.type=TagType.replied; break;
+    //   case 'tagged': this.type=TagType.tagged; break;
+    //   case 'drafts': this.type=TagType.drafts; break;
+    //   case 'outbox': this.type=TagType.outbox; break;
+    //   default: throw new Error("Tag Type not implemented:" + tag.type);
+    // }
+    this.type = tag.type
     this.icon = tag.icon;
     this.label = tag.label;
     this.label_color = Server.str2color(tag.label_color);

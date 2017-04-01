@@ -31,8 +31,8 @@ export class ThreadManager {
   }
 }
 
-enum ThreadEntryType { single, top, middle, bottom}
-class ThreadEntry {
+export enum ThreadEntryType { single, top, middle, bottom}
+export class ThreadEntry {
   messageID: string
   type: ThreadEntryType
   message: Message
