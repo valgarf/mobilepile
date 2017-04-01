@@ -44,7 +44,7 @@ export class MailboxPage {
       // for some reason this fails the typescript
 
 
-    this.mails = tmpobs.do(Lib.logfunc).catch( (err) =>  {
+    this.mails = tmpobs.catch( (err) =>  {
         if (err instanceof Error) {
           this.msg.displayError(err)
         }

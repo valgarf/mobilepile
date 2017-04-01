@@ -11,5 +11,6 @@ export class DerivedError extends Error {
   }
 }
 
+export class RuntimeError extends DerivedError {};
 export class ConnectionError extends DerivedError {};
 export class AuthenticationError extends DerivedError {};

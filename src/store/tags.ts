@@ -1,5 +1,6 @@
-import { observable, computed, autorun, intercept } from 'mobx'
+import { observable, computed, autorun, action } from 'mobx'
 import * as Server from '@root/server'
+import {Store} from './store'
 
 export class TagManager {
   @observable all: Tag[] = [];
@@ -7,26 +8,22 @@ export class TagManager {
     return this.all.filter( tag => tag.is_root )
   }
 
-  constructor() {
-    let self = this
-    autorun( () => {
-      console.log("MOBX TAGS:", self.root.filter((tag) => tag.visible ))
-    })
+  constructor(public store: Store) {
+    // autorun( () => {
+    //   console.log("MOBX TAGS:", self.root.filter((tag) => tag.visible ))
+    // })
   }
 
   public getByID(id: string): Tag {
-    let result = this.all.find( (tag) => tag.ID == id)
-    if (result === undefined)
-      result = null
-    return result
+    return this.all.find( (tag) => tag.ID == id)
   }
 
-  public update(taglist: Server.ITag[]) {
+  @action public update(taglist: Server.ITag[]) {
     let tmplist = []
     let tmpmap = {}
     for (let tag of taglist) {
       let tagobj = this.getByID(tag.tid)
-      if (tagobj === null) {
+      if (tagobj == null) {
         tagobj = new Tag(tag.tid, this)
       }
       tagobj.update(tag)
@@ -44,7 +41,6 @@ export class TagManager {
       (this.all as any).replace(tmplist) //no types for mobx
     }
   }
-
 }
 
 
@@ -66,7 +62,7 @@ export class Tag {
   // @observable type: TagType;
 
   @computed get is_root(): boolean {
-    return this.parent === null;
+    return this.parent == null;
   }
   @computed get visible(): boolean {
     return this.display != TagDisplayType.invisible;
@@ -75,10 +71,10 @@ export class Tag {
     return sprintf(this.search_terms, {slug: this.slug})
   };
 
-  constructor(public ID: string, private store: TagManager) {
+  constructor(public ID: string, private manager: TagManager) {
   }
 
-  update(tag: Server.ITag) {
+  @action update(tag: Server.ITag) {
     switch(tag.display) {
       case 'invisible': this.display=TagDisplayType.invisible; break;
       case 'priority': this.display=TagDisplayType.priority; break;

@@ -25,23 +25,20 @@ export interface IMessageAttachment {
 
 }
 
-export interface IMessageHTML {
-  charset: string;
-  crypto: IMessageTextCrypto;
-  data: string;
-  type: string;
-}
-
 export interface IMessageTextCrypto {
 
 }
 
-export interface IMessageText {
+export interface IMessagePart {
   charset: string;
   crypto: IMessageTextCrypto;
   data: string;
   type: string;
 }
+
+export interface IMessageHTML extends IMessagePart {}
+
+export interface IMessageText extends IMessagePart {}
 
 export interface IMessage {
   attachments: [IMessageAttachment]; //??
@@ -78,7 +75,7 @@ export interface IMessageMetadata {
   parent_mid: string; // parent metadata id??, something with threads... can be the same as the mid (when there is no parent? strange choice...)
   subject: string;
   tag_tids: [string];
-  thread_mid: string; // ??? not quite sure yet.... maybe id of first message in thread? or id of the thread?
+  thread_mid: string; // id of the thread?
   timestamp: number; // typical json format, 10 digits (*1000 for milliseconds)
   to_aids: [string]; // receiver adresses
   urls: {
@@ -87,8 +84,8 @@ export interface IMessageMetadata {
   }
 }
 
-export type IMessageEntry = [string, "", [any]] | [string, "└", [any]] | [string, "r", [string]]
-export type IMessageThread = [IMessageEntry];
+export type IMessageEntry = [string, "", [any]] | [string, "r", [string]] | [string, "├", [any]] | [string, "└", [any]]
+export type IMessageThread = IMessageEntry[];
 
 export interface ITag {
   display: string; //"tag" oder "invisible"

@@ -1,11 +1,13 @@
 import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
 import {NavController, ToastController} from 'ionic-angular';
 import {Observable, BehaviorSubject} from 'rxjs/Rx'
+import {observable} from 'mobx'
 
 import {dateFormat} from 'dateformat'
 import * as Server from '@root/server'
 import * as Lib from '@root/lib'
 import * as Comp from '@root/components'
+import { Store } from '@root/store'
 
 @Component({
   selector: 'mail-info',
@@ -28,7 +30,7 @@ export class MailInfoComponent {
   public thread: Server.IMessageThread;
   public metadata: Server.IMessageMetadata;
 
-  constructor(private data: Server.DataStore) {
+  constructor(private data: Server.DataStore, private store: Store) {
   }
 
   get dateFormatString(): string {
@@ -96,6 +98,7 @@ export class MailInfoComponent {
         }
       }
     }
+
     else {
       this.name = undefined
       this.subject = undefined

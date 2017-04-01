@@ -23,6 +23,7 @@ export class Server {
   private _pulse: Observable<boolean>
   private _lastPoll: number
 
+  public storeUpdateCallback: ((data: ServerInterfaces.IData) => void) = null
   // private _authenticated : BehaviorSubject<boolean> = new BehaviorSubject(false)
   // get authenticated(): boolean {return this._authenticated.getValue()}
   // set authenticated(value: boolean) {this._authenticated.next(value)}
@@ -126,6 +127,9 @@ export class Server {
     .map(res => <ServerInterfaces.IResultSearch>(res.result))
     .do(res => {
       self.data.updateData(res.data)
+      if (this.storeUpdateCallback != null) {
+        this.storeUpdateCallback(res.data)
+      }
       // console.log('Query result:',res)
     })
   }
