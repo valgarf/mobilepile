@@ -42,4 +42,9 @@ export class MailViewPage {
         self.subject = self.data.metadata[self.mid].subject
     })
   }
+  // ngAfterViewInit() {
+  //   var x = document.getElementById("mailframe");
+  //   var y = (<HTMLIFrameElement> x).contentWindow.document;
+  //   y.body.style.zoom = "50%";
+  // }
 }

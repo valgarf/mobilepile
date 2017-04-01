@@ -31,4 +31,26 @@ page-mailview {
   ion-content.content {
     width: 100% !important;
   }
+
+  div.mailframe-wrap {
+    width : 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+  iframe.message-part-html {
+    width : 133%;
+    height: 133%;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+
+    -ms-zoom: 0.75;
+    -moz-transform: scale(0.75);
+    -moz-transform-origin: 0 0;
+    -o-transform: scale(0.75);
+    -o-transform-origin: 0 0;
+    -webkit-transform: scale(0.75);
+    -webkit-transform-origin: 0 0;
+    overflow: hidden;
+  }
 }
