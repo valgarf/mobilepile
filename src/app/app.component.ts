@@ -2,7 +2,7 @@ import { Component, ViewChild } from '@angular/core';
 import { Platform, MenuController } from 'ionic-angular';
 import { StatusBar, Splashscreen } from 'ionic-native';
 
-import { Server } from '@root/server'
+import { Store } from '@root/store'
 import * as Lib from '@root/lib'
 import * as Pages from '@root/pages'
 
@@ -26,14 +26,14 @@ export class MyApp {
     }
   }
 
-  constructor(platform: Platform, private server: Server, private menuCtrl: MenuController) {
+  constructor(platform: Platform, private store: Store, private menuCtrl: MenuController) {
     let self = this;
     Lib.bindMethods(this)
     platform.ready().then(() => {
       // Okay, so the platform is ready and our plugins are available.
       // Here you can do any higher level native things you might need.
       StatusBar.styleDefault();
-      server.authenticatedObs.subscribe(self.handleAuthNavigation);
+      store.state.authenticatedObs.subscribe(self.handleAuthNavigation);
       Splashscreen.hide();
     });
   }

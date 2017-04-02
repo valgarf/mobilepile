@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 
 import {NavController} from 'ionic-angular';
 
-import {Server} from '@root/server'
+import {Store} from '@root/store'
 import * as Lib from '@root/lib'
 import * as Comp from '@root/components'
 
@@ -16,14 +16,14 @@ export class LoginPage {
   password: string = ''; //'testingonly'
   allowSubmission = true
 
-  constructor(public navCtrl: NavController, private server: Server) {
+  constructor(public navCtrl: NavController, private store: Store) {
     Lib.bindMethods(this)
-    this.url=server.url
-    this.password=server.password
+    this.url=this.store.state.url
+    this.password=this.store.state.password
   }
 
   ionViewCanLeave(): boolean {
-    return this.server.authenticated
+    return this.store.state.authenticated
   }
 
   login() {
@@ -34,10 +34,10 @@ export class LoginPage {
 
     // console.log('LOGIN', this.url, this.password)
     let self = this
-    this.server.url = this.url
-    this.server.password = this.password
-    this.server.login()
-      .then((() => {self.allowSubmission = true}))
+    this.store.state.url = this.url
+    this.store.state.password = this.password
+    this.store.state.login()
+      .then( () => {self.allowSubmission = true} )
   }
 
 }

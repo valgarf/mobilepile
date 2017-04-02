@@ -9,7 +9,6 @@ import {toStream} from 'mobx-utils'
 
 import * as ServerInterfaces from './interfaces'
 import * as Lib from '@root/lib'
-import {DataStore} from './data'
 
 @Injectable()
 export class Server {
@@ -30,7 +29,7 @@ export class Server {
   // get authenticatedObs(): Observable<boolean> {return this._authenticated.distinctUntilChanged()}
   @observable authenticated: boolean = false;
   authenticatedObs: BehaviorSubject<boolean>;
-  constructor(private http: Http, private msg: MessageHandler, public data: DataStore) {
+  constructor(private http: Http) { //}, private msg: MessageHandler) {
     Lib.bindMethods(this)
     let self = this
     this.authenticatedObs = new BehaviorSubject(false);
@@ -45,7 +44,7 @@ export class Server {
     // this.poll()
   }
 
-  login(): Promise<any> {
+  login(): Promise<boolean> {
     let self = this
     let body = new URLSearchParams();
     body.set('pass', this.password);
@@ -70,14 +69,17 @@ export class Server {
         //     console.log("subscription called")
         //   })
         // })
-        return res;
+        // return res;
+        return true;
       })
       .catch( (err) => {
         self.authenticated = false;
-        this.msg.displayError(err)
-        return Observable.of({})
+        // this.msg.displayError(err)
+        // return Observable.of({})
+        return Observable.of(false);
       })
       .toPromise()
+
 
     return promise;
   }
@@ -126,7 +128,6 @@ export class Server {
     .map(res => <ServerInterfaces.IServerResponse>res.json())
     .map(res => <ServerInterfaces.IResultSearch>(res.result))
     .do(res => {
-      self.data.updateData(res.data)
       if (this.storeUpdateCallback != null) {
         this.storeUpdateCallback(res.data)
       }
@@ -143,7 +144,18 @@ export class Server {
     body.set('end', end.toString());
     return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
       .let(this._handleSearch)
-      // .do((data) => Lib.logfunc('search results:',data) )
+  }
+
+  searchOnce(query: string = 'in:Inbox', order: string = 'rev-freshness', start:number = 0, end:number = 20): Promise<ServerInterfaces.IResultSearch> {
+    let self = this
+    let body = new URLSearchParams();
+    body.set('q', query);
+    body.set('order', order);
+    body.set('start', start.toString());
+    body.set('end', end.toString());
+    return this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body}))
+            .let(this._handleSearch)
+            .toPromise()
   }
 
   tags(): Observable<ServerInterfaces.IResultTags> {
@@ -164,15 +176,8 @@ export class Server {
         for (let tag of res.tags) {
           tagData.tags[tag.tid] = tag
         }
-        this.data.updateData(tagData)
       })
-    // result.subscribe((data) => Lib.logfunc('tag data:',data) )
     return result
-//       .map(res => <ServerInterfaces.IResultSearch>(res.result))
-//       .do(res => {
-//         this.data.updateData(res.data)
-        // console.log('Query result:',res)
-//       })
   }
 
   getMessage(mid: string): Promise<ServerInterfaces.IResultSearch>{

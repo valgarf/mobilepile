@@ -3,17 +3,17 @@
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>
-      {{tag}}
+    <ion-title *mobxAutorun>
+      {{this.name}}
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 
 
-<ion-content>
+<ion-content *mobxAutorun>
   <ion-list>
-    <mail-info *ngFor='let mail of mails | async' [messageID]=mail (open)="open(mail)">
+    <mail-info *ngFor='let mail of this.search.messageIDs' [messageID]=mail (open)="open(mail)">
     </mail-info>
   </ion-list>
   <ion-infinite-scroll (ionInfinite)="loadMore($event)">

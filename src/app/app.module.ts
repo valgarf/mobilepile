@@ -5,7 +5,7 @@ import { MobxAngularModule } from 'mobx-angular';
 
 import * as Pages from '@root/pages';
 import * as Components from '@root/components'
-import { DataStore, Server } from '@root/server';
+import { Server } from '@root/server';
 import { Store } from '@root/store'
 
 @NgModule({
@@ -32,7 +32,6 @@ import { Store } from '@root/store'
   ],
   providers: [
     {provide: ErrorHandler, useClass: IonicErrorHandler},
-    DataStore,
     Components.MessageHandler,
     Server,
     Store,

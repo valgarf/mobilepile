@@ -67,7 +67,7 @@ export class MailInfoComponent {
     return null
   }
 
-  constructor(private data: Server.DataStore, private store: Store) {
+  constructor(private store: Store) {
 
   }
 

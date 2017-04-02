@@ -5,17 +5,9 @@ import {NavController} from 'ionic-angular';
 import {Observable} from 'rxjs/Rx'
 import {observable, computed} from 'mobx'
 
-import {Server, DataStore, ITag, str2color} from '@root/server'
 import {Store, Tag} from '@root/store'
 import * as Lib from '@root/lib'
 import * as Comp from '@root/components'
-
-
-export interface ITagTree extends ITag {
-  children: ITagTree[],
-  open: boolean
-}
-
 
 @Component({
   selector: 'tagitem',

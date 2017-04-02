@@ -1,3 +1,5 @@
+import {sprintf} from 'sprintf-js'
+
 import { observable, computed, autorun, action, ObservableMap } from 'mobx'
 import * as Server from '@root/server'
 import {Store} from './store'
