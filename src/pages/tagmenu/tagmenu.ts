@@ -5,7 +5,7 @@ import {Observable} from 'rxjs/Rx'
 import {observable, computed} from 'mobx'
 import {sprintf} from 'sprintf-js'
 
-import {Server, DataStore, ITag, str2color} from '@root/server'
+import {Server, ITag, str2color} from '@root/server'
 import * as Lib from '@root/lib'
 import * as Comp from '@root/components'
 import {Store, Tag, TagDisplayType} from '@root/store'
@@ -30,7 +30,7 @@ export class TagmenuPage {
     ]
   }
 
-  constructor(public menuCtrl: MenuController, private server: Server, private data: DataStore, private store: Store) {
+  constructor(public menuCtrl: MenuController, private server: Server, private store: Store) {
     Lib.bindMethods(this)
     this.tags = server.tags().map(res => res.tags)
     this.tagsTree = this.tags.map( tags => tags.filter( tag => tag.display!="invisible" ) ).map(this.createTagTree)

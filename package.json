@@ -45,5 +45,11 @@
     "cordova-plugin-device"
   ],
   "cordovaPlatforms": [],
-  "description": "mobilepile: An Ionic project"
+  "description": "mobilepile: An Ionic project",
+  "importSort": {
+    ".ts, .tsx": {
+      "parser": "typescript",
+      "style": "renke"
+    }
+  }
 }

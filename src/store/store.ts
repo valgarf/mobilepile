@@ -19,7 +19,7 @@ export class Store {
   constructor(@Inject(forwardRef(() => Server)) private server: Server) {
     this.tags = new TagManager(this)
     this.addresses = new AddressManager(this)
-    this.messages = new MessageManager(this)
+    this.messages = new MessageManager(this, server)
     this.threads = new ThreadManager(this)
     server.tags().map( (res) => res.tags)
       .distinctUntilChanged( (a,b) => JSON.stringify(a)== JSON.stringify(b) )

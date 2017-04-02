@@ -8,7 +8,7 @@ import { Thread } from './threads'
 export class MessageManager {
   @observable all: ObservableMap<Message> = new ObservableMap<Message>();
 
-  constructor(public store: Store) {
+  constructor(public store: Store, public server: Server.Server) {
     autorun( () => {
       console.log("MOBX MESSAGES:", this.all.toJS() )
     })
@@ -74,6 +74,20 @@ export class Message {
   @computed get thread(): Thread {
     return this.manager.store.threads.getByID(this.threadID)
   }
+  @computed get text_complete(): string {
+    let result = ""
+    for (let text of this.text_parts) {
+      result += text.data
+    }
+    return result
+  }
+  @computed get html_complete(): string {
+    let result = ""
+    for (let html of this.html_parts) {
+      result += html.data
+    }
+    return result
+  }
 
   constructor(public ID: string, private manager: MessageManager) {
   }
@@ -97,5 +111,9 @@ export class Message {
       this.tagIDS = msg.tag_tids
       this.threadID = msg.thread_mid
     }
+  }
+
+  public loadMessage() {
+    this.manager.server.getMessage(this.ID)
   }
 }

@@ -1,19 +1,19 @@
-<ion-header>
+ <ion-header>
   <ion-navbar>
     <button ion-button menuToggle>
       <ion-icon name="menu"></ion-icon>
     </button>
-    <ion-title>
-      {{subject}}
+    <ion-title *mobxAutorun>
+      {{this.message.subject}}
     </ion-title>
   </ion-navbar>
 </ion-header>
 
 
 
-<ion-content>
-  <div class="text" *ngIf="!show_html">{{content_text}}</div>
+<ion-content *mobxAutorun>
+  <div class="text" *ngIf="!this.show_html">{{this.message.text_complete}}</div>
   <div class="mailframe-wrap">
   <iframe id="mailframe" seamless="" frameborder=false sandbox="allow-same-origin allow-top-navigation allow-popups allow-popups-to-escape-sandbox"
-        class="message-part-html" target="_blank" [srcdoc]="safe_html"></iframe></div>
+        class="message-part-html" target="_blank" [srcdoc]="this.safe_html"></iframe></div>
 </ion-content>
