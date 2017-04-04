@@ -1,6 +1,7 @@
 
 // export * from './reactive.ts';
 export * from './errors'
+export * from './logging'
 
 /**
  * Check if object is a function
