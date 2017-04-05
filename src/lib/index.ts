@@ -33,4 +33,17 @@ export function bindMethods(self: Object) : void {
   }
 }
 
+
+/**
+ * delay - asynchronous function that delays the execution of upcoming code by the given time
+ *
+ * @param  {number} time given in milliseconds
+ * @returns {void}
+ */
+export async function delay(time: number): Promise<void> {
+  return new Promise( (resolve, reject) => {
+    setTimeout(resolve, time)
+  })
+}
+
 export var logfunc = console.log.bind(console)

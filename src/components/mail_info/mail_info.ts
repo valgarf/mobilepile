@@ -17,21 +17,24 @@ import { Store, Thread, Message, Tag } from '@root/store'
 export class MailInfoComponent {
   @Output() open: EventEmitter<any> = new EventEmitter<any>();
 
-  @observable private _threadID: string;
-  @observable private _messageID: string;
+  @observable private _threadID: string = "";
+  @observable private _messageID: string = "";
   get threadID(): string {
     return this._threadID
   }
   @Input() set threadID( value: string ) {
     this._threadID = value
-    this._messageID = this.thread.entries[0].messageID
+    if (this.thread != null)
+      this._messageID = this.thread.entries[0].messageID
   }
   get messageID(): string {
     return this._messageID
   }
   @Input() set messageID( value: string ) {
     this._messageID = value
-    this._threadID = this.message.threadID
+    if (this.message != null) {
+      this._threadID = this.message.threadID
+    }
   }
   @computed get thread(): Thread {
     return this.store.threads.getByID(this.threadID)
@@ -40,7 +43,9 @@ export class MailInfoComponent {
     return this.store.messages.getByID(this.messageID)
   }
   @computed get thread_length(): number {
-    return this.thread.entries.length
+    if (this.thread != null)
+      return this.thread.entries.length
+    return null
   }
 
   @computed get dateFormatString(): string {
@@ -59,16 +64,23 @@ export class MailInfoComponent {
   }
 
   @computed get color(): string {
+    if (this.message == null) {
+      return 'black'
+    }
     for (let tag of this.message.tags) {
       if (tag != null && tag.is_mailbox && tag.is_root) {
         return tag.label_color
       }
     }
-    return null
+    return 'black'
   }
 
+  private _handle
   constructor(private store: Store) {
-
+    // this._handle = autorun( () )
   }
 
+  public ionViewWillUnload() {
+    // this._handle()
+  }
 }

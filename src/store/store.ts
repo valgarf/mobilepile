@@ -22,16 +22,12 @@ export class Store {
 
   constructor(private server: Server) {
     this.state = new StateManager(this, server)
-    this.tags = new TagManager(this)
+    this.tags = new TagManager(this, server)
     this.addresses = new AddressManager(this)
     this.messages = new MessageManager(this, server)
     this.threads = new ThreadManager(this)
     this.search = new SearchManager(this, server)
 
-    server.tags().map( (res) => res.tags)
-      .distinctUntilChanged( (a,b) => JSON.stringify(a)== JSON.stringify(b) )
-      .subscribe(this.tags.update.bind(this.tags))
-    server.storeUpdateCallback = this.updateStore.bind(this)
   }
 
   updateStore(data: IData) {
@@ -42,7 +38,8 @@ export class Store {
     this.threads.update(data.threads)
   }
 
-  refresh(): Promise<boolean> {
-    return this.search.refresh()
+  async refresh(): Promise<void> {
+    await this.tags.refresh()
+    await this.search.refresh()
   }
 }

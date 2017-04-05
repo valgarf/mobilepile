@@ -113,7 +113,8 @@ export class Message {
     }
   }
 
-  public loadMessage() {
-    this.manager.server.getMessage(this.ID)
+  public async loadMessage() {
+    let result = await this.manager.server.getMessage(this.ID)
+    this.manager.store.updateStore(result.data)
   }
 }

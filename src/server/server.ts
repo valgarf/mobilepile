@@ -19,75 +19,37 @@ export class Server {
   jsonRequest: RequestOptions = new RequestOptions({ headers: new Headers({'Content-Type': 'application/json'}), withCredentials: true });
   plainRequest: RequestOptions = new RequestOptions({ withCredentials: true });
 
-  private _pulse: Observable<boolean>
   private _lastPoll: number
 
-  public storeUpdateCallback: ((data: ServerInterfaces.IData) => void) = null
-  // private _authenticated : BehaviorSubject<boolean> = new BehaviorSubject(false)
-  // get authenticated(): boolean {return this._authenticated.getValue()}
-  // set authenticated(value: boolean) {this._authenticated.next(value)}
-  // get authenticatedObs(): Observable<boolean> {return this._authenticated.distinctUntilChanged()}
-  @observable authenticated: boolean = false;
-  authenticatedObs: BehaviorSubject<boolean>;
   constructor(private http: Http) { //}, private msg: MessageHandler) {
     Lib.bindMethods(this)
     let self = this
-    this.authenticatedObs = new BehaviorSubject(false);
-    Observable.from(toStream(() => self.authenticated)).subscribe(this.authenticatedObs)
 
-    let clock = Observable.timer(0, 20000).share() // hot observable
-    let evtstream = Observable.combineLatest([clock, this.authenticatedObs], (i,v) => v); // hot observable
-    let buffer = new BehaviorSubject(false) // make a cold observable out of a hot one
-    evtstream.subscribe(buffer)
-    this._pulse = buffer.filter( v => v)
     this._lastPoll = Date.now()/1000
     // this.poll()
   }
 
-  login(): Promise<boolean> {
+  async login(): Promise<boolean> {
     let self = this
     let body = new URLSearchParams();
     body.set('pass', this.password);
-    let promise = this.http.post(this.url+this.api+'/auth/login/', body, this.plainRequest)
-      .catch( (err) => {
-        return Observable.throw(new Lib.ConnectionError(err.toString()));
-      })
-      .map(res => {
-        var decoded: ServerInterfaces.IServerResponse
-        try {
-          decoded = res.json()
-          if (decoded.status == 'error') {
-            throw new Lib.AuthenticationError(decoded.message)
-          }
-        }
-        catch (SyntaxError) {} // Syntax error means we got back HTML instead of JSON -> login worked
-        self.authenticated = true
-        // --- test for correctly working pulse
-        // Observable.timer(10000).subscribe( () => {
-        //   console.log('subscribing')
-        //   self._pulse.subscribe(() => {
-        //     console.log("subscription called")
-        //   })
-        // })
-        // return res;
-        return true;
-      })
-      .catch( (err) => {
-        self.authenticated = false;
-        // this.msg.displayError(err)
-        // return Observable.of({})
-        return Observable.of(false);
-      })
-      .toPromise()
-
-
-    return promise;
+    let reply = await this.http.post(this.url+this.api+'/auth/login/', body, this.plainRequest).toPromise()
+    var decoded: ServerInterfaces.IServerResponse
+    try {
+      decoded = reply.json()
+      if (decoded.status == 'error') {
+        throw new Lib.AuthenticationError(decoded.message)
+      }
+    }
+    catch (SyntaxError) {} // Syntax error means we got back HTML instead of JSON -> login worked
+    Lib.log.info(['login', 'authentication', 'success'], `Successful login to ${this.url}`)
+    return true;
   }
 
   poll() {
     let self = this
     let observable = Observable.interval(500) // check every 500ms if last poll finished
-        .filter((evt) => self.authenticated) // block polling if we are not authenticated
+        // .filter((evt) => self.authenticated) // IMPORTANT block polling if we are not authenticated
         .map((r) => {console.log('poll'); return r;}) //DEBUG write to console to show that we are still alive
         // .exhaustMap(() => {return this.http.get(this.url+this.api+'/eventlog/',  new RequestOptions({ withCredentials: true, search: body}))}) // exhaustMap: only poll if previous poll finished
         .exhaustMap(() => {
@@ -97,7 +59,7 @@ export class Server {
           // console.log('Poll events')
           return this.http.get(this.url+'/logs/events/as.json',  new RequestOptions({ withCredentials: true, search: body}))
         }) // exhaustMap: only poll if previous poll finished
-        .let(self._handleConnectionError)
+        // .let(self._handleConnectionError) // IMPORTANT
         .map( (res) => res.json())
         .do( (res) => {
           let events = res.result.events
@@ -108,84 +70,31 @@ export class Server {
         .subscribe(Lib.logfunc)
   }
 
-  _handleConnectionError(obs: Observable<Response>): Observable<Response> {
-    let self = this
-    return obs.catch( (err, obs) => {
-      // console.log('CONNECTION ERROR:', err)
-      if (err.status == 0 || err.status == 403) {
-        self.authenticated = false;
-        return obs;
-      }
-      return Observable.throw(new Lib.ConnectionError(err.toString()));
-    })
-    // .retryWhen( errors => self._pulse)
-    // .retryWhen( errors => return errors.delay(1500))
-  }
-
-  _handleSearch(obs: Observable<Response>): Observable<ServerInterfaces.IResultSearch> {
-    let self = this
-    return obs.let(this._handleConnectionError)
-    .map(res => <ServerInterfaces.IServerResponse>res.json())
-    .map(res => <ServerInterfaces.IResultSearch>(res.result))
-    .do(res => {
-      if (this.storeUpdateCallback != null) {
-        this.storeUpdateCallback(res.data)
-      }
-      // console.log('Query result:',res)
-    })
-  }
-
-  search(query: string = 'in:Inbox', order: string = 'rev-freshness', start:number = 0, end:number = 20): Observable<ServerInterfaces.IResultSearch> {
+  async searchOnce(query: string = 'in:Inbox', order: string = 'rev-freshness', start:number = 0, end:number = 20): Promise<ServerInterfaces.IResultSearch> {
     let self = this
     let body = new URLSearchParams();
     body.set('q', query);
     body.set('order', order);
     body.set('start', start.toString());
     body.set('end', end.toString());
-    return this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})))
-      .let(this._handleSearch)
+    let reply = await this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})).toPromise()
+    let replyJson = <ServerInterfaces.IServerResponse>reply.json()
+    return <ServerInterfaces.IResultSearch>replyJson.result
   }
 
-  searchOnce(query: string = 'in:Inbox', order: string = 'rev-freshness', start:number = 0, end:number = 20): Promise<ServerInterfaces.IResultSearch> {
-    let self = this
-    let body = new URLSearchParams();
-    body.set('q', query);
-    body.set('order', order);
-    body.set('start', start.toString());
-    body.set('end', end.toString());
-    return this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body}))
-            .let(this._handleSearch)
-            .toPromise()
-  }
-
-  tags(): Observable<ServerInterfaces.IResultTags> {
+  async tagsOnce(): Promise<ServerInterfaces.IResultTags> {
     let self = this;
-    let result = this._pulse.exhaustMap( (evt) => this.http.get(this.url+this.api+'/tags/', new RequestOptions({ withCredentials: true})))
-      .let(self._handleConnectionError)
-      .map(res => <ServerInterfaces.IServerResponse>res.json())
-      .map(res => <ServerInterfaces.IResultTags>(res.result))
-      .distinctUntilChanged()
-      .do(res => {
-        let tagData: ServerInterfaces.IData = {
-          addresses: {},
-          messages: {},
-          metadata: {},
-          tags: {},
-          threads: {}
-        }
-        for (let tag of res.tags) {
-          tagData.tags[tag.tid] = tag
-        }
-      })
-    return result
+    let reply = await this.http.get(this.url+this.api+'/tags/', new RequestOptions({ withCredentials: true})).toPromise()
+    let replyJson = <ServerInterfaces.IServerResponse>reply.json();
+    return <ServerInterfaces.IResultTags>(replyJson.result)
   }
 
-  getMessage(mid: string): Promise<ServerInterfaces.IResultSearch>{
+  async getMessage(mid: string): Promise<ServerInterfaces.IResultSearch>{
     var self = this
     let body = new URLSearchParams();
     body.set('mid', mid);
-    return this.http.get(this.url+this.api+'/message/', new RequestOptions({ withCredentials: true, search: body}))
-      .let(this._handleSearch)
-      .toPromise()
+    let reply = await this.http.get(this.url+this.api+'/message/', new RequestOptions({ withCredentials: true, search: body})).toPromise()
+    let replyJson = <ServerInterfaces.IServerResponse>reply.json()
+    return <ServerInterfaces.IResultSearch>replyJson.result
   }
 }

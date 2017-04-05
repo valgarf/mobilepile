@@ -14,16 +14,22 @@ export class TagManager {
     return this.sorted.filter( tag => tag.is_root )
   }
 
-  constructor(public store: Store) {
+  constructor(public store: Store, private _server: Server.Server) {
     autorun( () => {
       console.log("MOBX TAGS:", this.root.filter((tag) => tag.visible ))
     })
   }
 
-  public getByID(id: string): Tag {
+  getByID(id: string): Tag {
     return this.all.get(id)
   }
 
+  // private _lastRefresh = null //maybe check for changes before updating? might reduce UI updates
+  async refresh(): Promise<void> {
+    let tagReply = await this._server.tagsOnce()
+    //.distinctUntilChanged( (a,b) => JSON.stringify(a)== JSON.stringify(b) ) //anything faster than stringify?
+    this.update(tagReply.tags)
+  }
 
   @action public update(taglist: Server.ITag[] | {[tid:string]: Server.ITag}) {
     let updateTag = ( tag: Server.ITag) => {

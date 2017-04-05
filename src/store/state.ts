@@ -3,6 +3,7 @@ import { observable, computed, autorun, intercept, action, ObservableMap } from 
 import {Observable, Subject, BehaviorSubject, Observer} from 'rxjs/Rx'
 
 import * as Server from '@root/server'
+import * as Lib from '@root/lib'
 import {Store} from './store'
 
 export class StateManager {
@@ -25,14 +26,20 @@ export class StateManager {
     // this ensures that the pulse will have 20 second pauses between refreshing, which can take a few seconds itself.
     // If refreshing takes longer (i.e. slow internet connection) the pulse will slow down.
     let timeoutHandle = null;
-    let heartbeat = () => {
-      if (!this.authenticated)
+    let heartbeat = async () => {
+      if (!this.authenticated) {
         return;
-      this.pulse.next(true)
-      console.log('PULSE')
-      this.store.refresh().then( () => {
+      }
+      try {
+        Lib.log.debug(['pulse'],'PULSE')
+        this.pulse.next(true)
+        await this.store.refresh()
         timeoutHandle = setTimeout(heartbeat, 20000)
-      }).catch( (err) => { console.log('SHOULD NOT HAPPEN _TWO_', err); return false})
+      }
+      catch(err) {
+        this.authenticated=false;
+        Lib.log.error(['unexpected', 'pulse'], err);
+      }
     }
     autorun( () => {
       this.authenticatedObs.next(this.authenticated)
@@ -45,13 +52,44 @@ export class StateManager {
     })
   }
 
-  login(): Promise<boolean> {
+  async login(): Promise<boolean> {
     this.server.url=this.url
     this.server.password=this.password
-    return this.server.login().then( res => {
-      this.authenticated = res;
-      return res;
-    }).catch( (err) => { console.log('SHOULD NOT HAPPEN _ONE_', err); return false})
+    try {
+      let result = await this.server.login()
+      await Lib.delay(500)
+      this.authenticated = result;
+      return result;
+    }
+    catch (err) {
+      this.authenticated = false;
+      Lib.log.error(['login', 'authentication', 'unexpected'], err);
+      return false
+    }
   }
+
+  private _handleError ( err: any ) {
+
+  }
+
+  handleErrors( errors: any[] ) {
+
+  }
+
+  //
+  // _handleConnectionError(obs: Observable<Response>): Observable<Response> {
+  //   let self = this
+  //   return obs.catch( (err, obs) => {
+  //     // console.log('CONNECTION ERROR:', err)
+  //     if (err.status == 0 || err.status == 403) {
+  //       // self.authenticated = false;
+  //       return obs;
+  //     }
+  //     return Observable.throw(new Lib.ConnectionError(err.toString()));
+  //   })
+  //   // .retryWhen( errors => self._pulse)
+  //   // .retryWhen( errors => return errors.delay(1500))
+  // }
+  //
 
 }

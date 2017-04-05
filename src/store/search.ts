@@ -22,7 +22,7 @@ export class SearchManager {
     return `<${query}> <${order}>`
   }
 
-  @action public create( query: string, order:string, amount: number = 50, offset: number = 0 ) {
+  @action public create( query: string, order:string, amount: number = 20, offset: number = 0 ) {
     let id=this.generateID(query, order)
     let search = this.getByID(id)
     if (search == null) {
@@ -61,7 +61,7 @@ export class Search {
     return this.messageIDs.map( id => this.manager.store.messages.getByID(id) )
   }
   @computed get threads(): Thread[] {
-    return this.messages.map( msg => msg.thread )
+    return this.messages.map( msg => msg != null ? msg.thread : null )
   }
   private _handle = null;
 
@@ -82,6 +82,7 @@ export class Search {
   @action public loadMore(num: number): Promise<boolean> {
     let promise = this.manager.server.searchOnce(this.query, this.order, this.offset + this.amount+1, this.offset + this.amount + num)
       .then(action( (res: Server.IResultSearch) => {
+        this.manager.store.updateStore(res.data)
         this.messageIDs = this.messageIDs.concat(res.thread_ids) // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
         this.amount += num
         return true;
@@ -111,6 +112,7 @@ export class Search {
     // // ---- END
     return this.manager.server.searchOnce(this.query, this.order, this.offset+1, this.offset + this.amount)
       .then(action( (res: Server.IResultSearch) => {
+        this.manager.store.updateStore(res.data)
         this.messageIDs =  res.thread_ids // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
         return true;
       })).catch( () => false)

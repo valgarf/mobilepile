@@ -5,7 +5,7 @@ export enum LogLevel {TRACE, DEBUG, INFO, WARN, ERROR}
 class Log {
 
   private  _filter: string[] = []
-  public level: LogLevel = LogLevel.INFO;
+  public level: LogLevel = LogLevel.DEBUG;
 
   constructor() {
   }

@@ -1,5 +1,5 @@
 <div *mobxAutorun>
-  <ion-item text-wrap [ngClass]='{"unread": !this.message.read, "read": this.message.read}' (click)="open.emit()">
+  <ion-item text-wrap *ngIf="this.message != null" [ngClass]='{"unread": !this.message.read, "read": this.message.read}' (click)="open.emit()">
     <div class='colorbar' *ngIf='this.color' [style.background-color]="this.color"></div>
     <ion-row class='name' [ngClass]='{"unread": !this.message.read}'>
       <span>{{this.message.from.name}}</span> <ion-badge class='badge' *ngIf='this.thread_length>1'>{{this.thread_length}}</ion-badge>
@@ -8,5 +8,8 @@
     <ion-row class='subject'>
       <label>{{this.message.subject}} <span class='snippet'>{{this.message.snippet}}</span></label>
     </ion-row>
+  </ion-item>
+  <ion-item *ngIf="this.message == null">
+    ERROR LOADING THIS MESSAGE! MessageID: {{this.messageID}} threadID: {{this.threadID}}
   </ion-item>
 </div>
