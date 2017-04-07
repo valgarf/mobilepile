@@ -15,8 +15,12 @@ export class StateManager {
   url: string = ""; //"http://localhost:33411"
   password: string = "";
 
+  messageObs: Subject<UIMessage>;
+
   constructor(public store: Store, public server: Server.Server) {
+    Lib.bindMethods(this)
     this.authenticatedObs = new BehaviorSubject(this.authenticated)
+    this.messageObs = new Subject()
     this.pulse = new Subject<boolean>()
     // Observable.from(toStream(() => this.authenticated)).subscribe(this.authenticatedObs)
 
@@ -37,8 +41,15 @@ export class StateManager {
         timeoutHandle = setTimeout(heartbeat, 20000)
       }
       catch(err) {
-        this.authenticated=false;
-        Lib.log.error(['unexpected', 'pulse'], err);
+        err = Lib.error.ensureErrorObject(err)
+        if (err instanceof Lib.ConnectionError || err instanceof Lib.AuthenticationError) {
+          this.authenticated=false;
+        }
+        Lib.error.attachTags(err, ['pulse'])
+        this.handleError(err)
+        if (this.authenticated) {
+          timeoutHandle = setTimeout(heartbeat, 5000) //retry refresh after a short time
+        }
       }
     }
     autorun( () => {
@@ -57,39 +68,74 @@ export class StateManager {
     this.server.password=this.password
     try {
       let result = await this.server.login()
-      await Lib.delay(500)
+      if (this.authenticated == false && result == true) {
+        await Lib.delay(1000) // otherwise the following requests will fail, the server takes a while
+      }
       this.authenticated = result;
       return result;
     }
     catch (err) {
       this.authenticated = false;
-      Lib.log.error(['login', 'authentication', 'unexpected'], err);
-      return false
+      Lib.error.attachTags(err, ['login', 'authentication'])
+      throw err
     }
   }
 
-  private _handleError ( err: any ) {
+  handleError( error: any ) {
+    let tags = []
+    if (error.tags != null) {
+      tags = error.tags
+    }
+    if (error.details != null) {
+      Lib.log.error(tags, error.toString(), error.details, error)
+    }
+    else {
+      Lib.log.error(tags, error.toString(), error)
+    }
 
+    if (error instanceof Error) {
+      let msg = UIMessage.fromError(error)
+      console.log(msg)
+      this.messageObs.next(msg)
+    }
+  }
+}
+
+export enum UIMessageType { info, warning, error}
+export class UIMessage {
+  readonly details: any[]
+  constructor(readonly type: UIMessageType=UIMessageType.error, readonly title: string="", readonly description: string="",  ...details: any[]) {
+    this.details = details
   }
 
-  handleErrors( errors: any[] ) {
-
+  static info(title: string, description: string, ...details:any[]): UIMessage {
+    return new UIMessage(UIMessageType.info, title, description, ...details)
   }
 
-  //
-  // _handleConnectionError(obs: Observable<Response>): Observable<Response> {
-  //   let self = this
-  //   return obs.catch( (err, obs) => {
-  //     // console.log('CONNECTION ERROR:', err)
-  //     if (err.status == 0 || err.status == 403) {
-  //       // self.authenticated = false;
-  //       return obs;
-  //     }
-  //     return Observable.throw(new Lib.ConnectionError(err.toString()));
-  //   })
-  //   // .retryWhen( errors => self._pulse)
-  //   // .retryWhen( errors => return errors.delay(1500))
-  // }
-  //
+  static warning(title: string, description: string, ...details:any[]): UIMessage {
+    return new UIMessage(UIMessageType.warning, title, description, ...details)
+  }
 
+  static error(title: string, description: string, ...details:any[]): UIMessage {
+    return new UIMessage(UIMessageType.error, title, description, ...details)
+  }
+
+  static fromError(err: Error) {
+    let name = err.name
+    if (name == null) {
+      name = err.constructor.name
+    }
+    let msg = err.message
+    // put stacktrace into details?
+    // let details = err.details
+    // if (details == null)
+    // {
+      // details = []
+    // }
+    return UIMessage.error(name, msg)
+  }
+
+  toString(): string {
+    return this.title+': '+this.description
+  }
 }

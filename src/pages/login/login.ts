@@ -38,6 +38,10 @@ export class LoginPage {
     this.store.state.password = this.password
     this.store.state.login()
       .then( () => {self.allowSubmission = true} )
+      .catch( (err) => {
+        self.allowSubmission = true
+        this.store.state.handleError(err)
+      })
   }
 
 }

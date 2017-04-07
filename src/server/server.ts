@@ -29,19 +29,45 @@ export class Server {
     // this.poll()
   }
 
+  private async _requestErrorHandling( req: Observable<Response>): Promise<any> {
+    try {
+      let reply = await req.toPromise();
+      return reply.json()
+    }
+    catch (err) {
+      if (err instanceof Error) {
+        Lib.error.attachTags(err, ['connection'])
+      }
+      else {
+        err = new Lib.ConnectionError(err.toString(), err)
+      }
+      throw err
+    }
+  }
+
+  private async _request( url: string, body: RequestOptions | URLSearchParams = null): Promise<ServerInterfaces.IServerResponse> {
+    if (body == null) {
+      body = new RequestOptions({ withCredentials: true })
+    }
+    else if (body instanceof URLSearchParams) {
+      body = new RequestOptions({ withCredentials: true, search: body})
+    }
+     return await this._requestErrorHandling(this.http.get(this.url+this.api+`/${url}/`, body))
+  }
+
   async login(): Promise<boolean> {
     let self = this
     let body = new URLSearchParams();
     body.set('pass', this.password);
-    let reply = await this.http.post(this.url+this.api+'/auth/login/', body, this.plainRequest).toPromise()
-    var decoded: ServerInterfaces.IServerResponse
     try {
-      decoded = reply.json()
+      var decoded: ServerInterfaces.IServerResponse = await this._requestErrorHandling(this.http.post(this.url+this.api+'/auth/login/', body, this.plainRequest))
       if (decoded.status == 'error') {
-        throw new Lib.AuthenticationError(decoded.message)
+        throw new Lib.AuthenticationError(decoded.message, decoded)
       }
     }
-    catch (SyntaxError) {} // Syntax error means we got back HTML instead of JSON -> login worked
+    catch (e) {
+        if (! (e instanceof SyntaxError)) throw e;
+    } // Syntax error means we got back HTML instead of JSON -> login worked
     Lib.log.info(['login', 'authentication', 'success'], `Successful login to ${this.url}`)
     return true;
   }
@@ -71,30 +97,25 @@ export class Server {
   }
 
   async searchOnce(query: string = 'in:Inbox', order: string = 'rev-freshness', start:number = 0, end:number = 20): Promise<ServerInterfaces.IResultSearch> {
-    let self = this
     let body = new URLSearchParams();
     body.set('q', query);
     body.set('order', order);
     body.set('start', start.toString());
     body.set('end', end.toString());
-    let reply = await this.http.get(this.url+this.api+'/search/', new RequestOptions({ withCredentials: true, search: body})).toPromise()
-    let replyJson = <ServerInterfaces.IServerResponse>reply.json()
-    return <ServerInterfaces.IResultSearch>replyJson.result
+    let reply = await this._request('search', body)
+    return <ServerInterfaces.IResultSearch>reply.result
   }
 
   async tagsOnce(): Promise<ServerInterfaces.IResultTags> {
-    let self = this;
-    let reply = await this.http.get(this.url+this.api+'/tags/', new RequestOptions({ withCredentials: true})).toPromise()
-    let replyJson = <ServerInterfaces.IServerResponse>reply.json();
-    return <ServerInterfaces.IResultTags>(replyJson.result)
+    let reply = await this._request('tags')
+    return <ServerInterfaces.IResultTags>(reply.result)
   }
 
   async getMessage(mid: string): Promise<ServerInterfaces.IResultSearch>{
     var self = this
     let body = new URLSearchParams();
     body.set('mid', mid);
-    let reply = await this.http.get(this.url+this.api+'/message/', new RequestOptions({ withCredentials: true, search: body})).toPromise()
-    let replyJson = <ServerInterfaces.IServerResponse>reply.json()
-    return <ServerInterfaces.IResultSearch>replyJson.result
+    let reply = await this._request('message', body)
+    return <ServerInterfaces.IResultSearch>reply.result
   }
 }

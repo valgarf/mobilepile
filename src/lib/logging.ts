@@ -20,7 +20,7 @@ class Log {
       if (!Array.isArray(tags)) {
         tags = [tags]
       }
-      tagstr = tags.toString()
+      tagstr = tags.sort().toString()
     }
     let filter = false
     if (this._filter.length == 0) {

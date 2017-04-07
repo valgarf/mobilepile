@@ -16,7 +16,10 @@
 // automatically applied to the <body> element in the app.
 
 
-$color-error: #ff8200;
+$color-error: #ff3d00;
+$color-warning: #ff8a00;
+$color-info: #0085ff;
+
 $color-grey-text: #6c6c6c;
 // $color-new: #8dc7fc;
 $color-new: #ffffff;
@@ -34,5 +37,17 @@ $font-size-large: 12pt;
 .toast-error {
   .toast-container {
     background-color: $color-error
+  }
+}
+
+.toast-warning {
+  .toast-container {
+    background-color: $color-warning
+  }
+}
+
+.toast-info {
+  .toast-container {
+    background-color: $color-info
   }
 }

@@ -4,36 +4,33 @@ import {ToastController, AlertController} from 'ionic-angular'
 
 import 'rxjs/'
 import * as Lib from '@root/lib'
+import {Store, UIMessage, UIMessageType} from '@root/store'
 
 @Injectable()
 export class MessageHandler {
   // private _toastHidden: BehaviorSubject<boolean> = new BehaviorSubject(true)
   // private _queue: Subject<any> =  new Subject<any>()
   private _toast: any = null
-  constructor (public toastCtrl: ToastController, public alertCtrl: AlertController,) {
+  constructor (public toastCtrl: ToastController, public alertCtrl: AlertController, public store: Store) {
     Lib.bindMethods(this)
+    this.store.state.messageObs.subscribe( this.showUIMessage )
     // this._queue.pausableBuffered(this._toastHidden)
   }
 
-  test() {
-    console.log('Hello Handler')
-  }
-
-  displayError(err: Error) {
-    console.log('Display Error:', err)
-    let self = this
+  showUIMessage( msg: UIMessage ) {
+    let cssClass = "toast-"+UIMessageType[msg.type]
     if (this._toast) {
       this._toast.dismiss()
     }
     this._toast = this.toastCtrl.create({
-       message: err.toString(),
+       message: msg.toString(),
        duration: 8000,
        showCloseButton: true,
        closeButtonText: 'Ok',
        cssClass: 'toast-error'
     })
     this._toast.onDidDismiss( () => {
-      self._toast = null;
+      this._toast = null;
     })
     this._toast.present()
   }

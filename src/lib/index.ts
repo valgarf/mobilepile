@@ -41,7 +41,7 @@ export function bindMethods(self: Object) : void {
  * @returns {void}
  */
 export async function delay(time: number): Promise<void> {
-  return new Promise( (resolve, reject) => {
+  return new Promise<void>( (resolve, reject) => {
     setTimeout(resolve, time)
   })
 }
