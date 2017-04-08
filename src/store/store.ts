@@ -25,7 +25,7 @@ export class Store {
     this.tags = new TagManager(this, server)
     this.addresses = new AddressManager(this)
     this.messages = new MessageManager(this, server)
-    this.threads = new ThreadManager(this)
+    this.threads = new ThreadManager(this, server)
     this.search = new SearchManager(this, server)
 
   }

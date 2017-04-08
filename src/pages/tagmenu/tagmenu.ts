@@ -1,4 +1,4 @@
-import {Component} from '@angular/core';
+import {Component, ChangeDetectionStrategy} from '@angular/core';
 import {MenuController, NavController} from 'ionic-angular';
 import {computed} from 'mobx'
 
@@ -8,7 +8,8 @@ import {MailboxPage} from '../mailbox/mailbox'
 
 @Component({
   selector: 'page-tagmenu',
-  templateUrl: 'tagmenu.html'
+  templateUrl: 'tagmenu.html',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class TagmenuPage {
 
@@ -26,7 +27,7 @@ export class TagmenuPage {
 
   onSelect(tag: Tag) {
     let navCtrl = <NavController>this.menuCtrl.get().content
-    navCtrl.setRoot(MailboxPage, { search: tag.search_expression })
+    navCtrl.setRoot(MailboxPage, { tag: tag })
     //navCtrl.popToRoot()
   }
 }

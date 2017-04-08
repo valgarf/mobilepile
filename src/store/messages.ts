@@ -44,9 +44,9 @@ function TypeGuardIMessage(arg: any): arg is MailpileInterfaces.IMessage {
   return arg.text_parts !== undefined
 }
 
-function TypeGuardIMessageMetadata(arg: any): arg is MailpileInterfaces.IMessageMetadata {
-  return arg.from !== undefined
-}
+// function TypeGuardIMessageMetadata(arg: any): arg is MailpileInterfaces.IMessageMetadata {
+//   return arg.from !== undefined
+// }
 
 export class Message {
 

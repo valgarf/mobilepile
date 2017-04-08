@@ -3,7 +3,7 @@
     <div class='colorbar' *ngIf='this.color' [style.background-color]="this.color"></div>
     <ion-row class='name' [ngClass]='{"unread": !this.message.read}'>
       <span>{{this.message.from.name}}</span>
-      <ion-badge class='badge' *ngIf='this.thread_length>1'>{{this.thread_length}}</ion-badge>
+      <ion-badge class='badge' *ngIf='this.thread_length>1 && this.showThreadInfo'>{{this.thread_length}}</ion-badge>
       <span class='date'>{{this.message.timestamp | date:this.dateFormatString}} </span>
     </ion-row>
     <ion-row class='subject'>

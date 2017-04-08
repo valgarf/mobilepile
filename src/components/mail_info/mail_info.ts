@@ -10,6 +10,7 @@ import {Store, Thread, Message} from '@root/store'
 })
 export class MailInfoComponent {
   @Output() open: EventEmitter<any> = new EventEmitter<any>();
+  @Input() showThreadInfo: boolean = true;
 
   @observable private _threadID: string = "";
   @observable private _messageID: string = "";

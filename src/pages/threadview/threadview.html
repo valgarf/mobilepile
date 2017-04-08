@@ -1,0 +1,16 @@
+<ion-header>
+  <ion-navbar>
+    Thread
+    <!-- <ion-title *mobxAutorun>
+      {{this.name}}
+    </ion-title> -->
+  </ion-navbar>
+</ion-header>
+
+
+<ion-content *mobxAutorun>
+  <ion-list>
+    <mail-info *ngFor='let entry of this.thread.entries.reverse()' [messageID]='entry.messageID' [showThreadInfo]='false' (open)="open(entry.message)">
+    </mail-info>
+  </ion-list>
+</ion-content>

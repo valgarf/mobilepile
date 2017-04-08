@@ -12,7 +12,7 @@
 
 <ion-content *mobxAutorun>
   <ion-list>
-    <mail-info *ngFor='let mail of this.search.messageIDs' [messageID]=mail (open)="open(mail)">
+    <mail-info *ngFor='let mail of this.search.messages' [messageID]='mail.ID' (open)="open(mail)">
     </mail-info>
   </ion-list>
   <ion-infinite-scroll (ionInfinite)="loadMore($event)">

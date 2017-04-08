@@ -15,12 +15,13 @@ import {MyApp} from './app.component';
     Pages.MailboxPage,
     Pages.MailViewPage,
     Pages.TagmenuPage,
+    Pages.ThreadViewPage,
     Components.MailInfoComponent,
-    Components.TagitemComponent
+    Components.TagitemComponent,
   ],
   imports: [
     IonicModule.forRoot(MyApp),
-    MobxAngularModule
+    MobxAngularModule,
   ],
   bootstrap: [IonicApp],
   entryComponents: [
@@ -28,7 +29,8 @@ import {MyApp} from './app.component';
     Pages.LoginPage,
     Pages.MailboxPage,
     Pages.MailViewPage,
-    Pages.TagmenuPage
+    Pages.TagmenuPage,
+    Pages.ThreadViewPage,
   ],
   providers: [
     { provide: ErrorHandler, useClass: IonicErrorHandler },
