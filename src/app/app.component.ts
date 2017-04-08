@@ -1,10 +1,11 @@
-import { Component, ViewChild } from '@angular/core';
-import { Platform, MenuController } from 'ionic-angular';
-import { StatusBar, Splashscreen } from 'ionic-native';
+import {Component, ViewChild} from '@angular/core';
+import {Platform, MenuController} from 'ionic-angular';
+import {StatusBar, Splashscreen} from 'ionic-native';
 
-import { Store } from '@root/store'
+import {Store} from '@root/store'
 import * as Lib from '@root/lib'
 import * as Pages from '@root/pages'
+
 
 @Component({
   templateUrl: 'app.html'

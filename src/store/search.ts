@@ -1,17 +1,18 @@
-import { observable, computed, autorun, reaction, intercept, action, ObservableMap } from 'mobx'
+import {observable, computed, autorun, reaction, action, ObservableMap} from 'mobx'
+import * as math from 'mathjs'
 
-import * as Server from '@root/server'
+import {MailpileInterfaces, Server} from '@root/server'
 import {Store} from './store'
 import {Thread} from './threads'
 import {Message} from './messages'
-import * as math from 'mathjs'
+
 
 export class SearchManager {
   @observable all: ObservableMap<Search> = new ObservableMap<Search>();
 
-  constructor(public store: Store, public server: Server.Server) {
-    autorun( () => {
-      console.log("MOBX ADDRESSES:", this.all.toJS() )
+  constructor(public store: Store, public server: Server) {
+    autorun(() => {
+      console.log("MOBX ADDRESSES:", this.all.toJS())
     })
   }
 
@@ -22,8 +23,8 @@ export class SearchManager {
     return `<${query}> <${order}>`
   }
 
-  @action public create( query: string, order:string, amount: number = 20, offset: number = 0 ) {
-    let id=this.generateID(query, order)
+  @action public create(query: string, order: string, amount: number = 20, offset: number = 0) {
+    let id = this.generateID(query, order)
     let search = this.getByID(id)
     if (search == null) {
       search = new Search(this, query, order)
@@ -40,7 +41,7 @@ export class SearchManager {
   }
 
   @action public refresh(): Promise<boolean> {
-    return Promise.all( this.all.values().map( search => search.refresh() )).then( res => res.every( v => v))
+    return Promise.all(this.all.values().map(search => search.refresh())).then(res => res.every(v => v))
   }
 }
 
@@ -54,39 +55,40 @@ export class Search {
   readonly step: number = 30 //maximum allowed by the server
   @observable private _active: number = 0;
   @computed get active() {
-    return this._active>0
+    return this._active > 0
   }
   @observable messageIDs: string[] = [];
   @computed get messages(): Message[] {
-    return this.messageIDs.map( id => this.manager.store.messages.getByID(id) )
+    return this.messageIDs.map(id => this.manager.store.messages.getByID(id))
   }
   @computed get threads(): Thread[] {
-    return this.messages.map( msg => msg != null ? msg.thread : null )
+    return this.messages.map(msg => msg != null ? msg.thread : null)
   }
   private _handle = null;
 
-  constructor(private manager: SearchManager, readonly query: string, readonly order: string ) {
-    autorun( () => {
+  constructor(private manager: SearchManager, readonly query: string, readonly order: string) {
+    autorun(() => {
       console.log('SEARCHED THREADS:', this.threads)
     })
     let i = 0
-    this._handle = reaction( (): any => {
+    this._handle = reaction((): any => {
       let result = {
         offset: this.offset,
         amount: this.amount,
-        active: this.active};
+        active: this.active
+      };
       return result;
     }, this.refresh.bind(this))
   }
 
   @action public loadMore(num: number): Promise<boolean> {
-    let promise = this.manager.server.searchOnce(this.query, this.order, this.offset + this.amount+1, this.offset + this.amount + num)
-      .then(action( (res: Server.IResultSearch) => {
+    let promise = this.manager.server.searchOnce(this.query, this.order, this.offset + this.amount + 1, this.offset + this.amount + num)
+      .then(action((res: MailpileInterfaces.IResultSearch) => {
         this.manager.store.updateStore(res.data)
         this.messageIDs = this.messageIDs.concat(res.thread_ids) // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
         this.amount += num
         return true;
-      })).catch( () => false)
+      })).catch(() => false)
     return promise
   }
   @action public refresh(): Promise<boolean> {
@@ -110,12 +112,12 @@ export class Search {
     //     return true
     //   })).catch( () => {return false})
     // // ---- END
-    return this.manager.server.searchOnce(this.query, this.order, this.offset+1, this.offset + this.amount)
-      .then(action( (res: Server.IResultSearch) => {
+    return this.manager.server.searchOnce(this.query, this.order, this.offset + 1, this.offset + this.amount)
+      .then(action((res: MailpileInterfaces.IResultSearch) => {
         this.manager.store.updateStore(res.data)
-        this.messageIDs =  res.thread_ids // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
+        this.messageIDs = res.thread_ids // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
         return true;
-      })).catch( () => false)
+      })).catch(() => false)
   }
 
   @action public activate() {
@@ -123,7 +125,7 @@ export class Search {
   }
 
   @action public deactivate() {
-    this._active = math.max(0, this._active-1)
+    this._active = math.max(0, this._active - 1)
   }
 
 

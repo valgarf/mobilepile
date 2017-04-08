@@ -1,9 +1,9 @@
 <ion-item *mobxAutorun [style.padding-left]="leftPadding">
   <div class='arrow'>
-    <img class='arrow' [src]="this.arrow" [style.visibility]="this.visibility" (click)="open()"/>
+    <img class='arrow' [src]="this.arrow" [style.visibility]="this.visibility" (click)="open()" />
   </div>
-  <div class='icon'  [style.background-color]="tag.label_color">
-    <img class='icon' [src]="this.icon"/>
+  <div class='icon' [style.background-color]="tag.label_color">
+    <img class='icon' [src]="this.icon" />
   </div>
   <span class='tagname' (click)="select.emit(tag)">{{tag.name}}</span>
   <ion-list class="taglistDeeper" *ngIf="tag.open">

@@ -1,16 +1,16 @@
-import { observable, computed, autorun, intercept, action, ObservableMap } from 'mobx'
+import {observable, autorun, action, ObservableMap} from 'mobx'
 
-import * as Server from '@root/server'
+import {MailpileInterfaces} from '@root/server'
 
-import { Store } from './store'
-import { Message } from './messages'
+import {Store} from './store'
+import {Message} from './messages'
 
 export class ThreadManager {
   @observable all: ObservableMap<Thread> = new ObservableMap<Thread>();
 
   constructor(public store: Store) {
-    autorun( () => {
-      console.log("MOBX THREADS:", this.all.toJS() )
+    autorun(() => {
+      console.log("MOBX THREADS:", this.all.toJS())
     })
   }
 
@@ -18,8 +18,8 @@ export class ThreadManager {
     return this.all.get(id)
   }
 
-  @action public update( threadmap: { [id:string]: Server.IMessageThread }) {
-    Object.keys(threadmap).forEach( id => {
+  @action public update(threadmap: { [id: string]: MailpileInterfaces.IMessageThread }) {
+    Object.keys(threadmap).forEach(id => {
       let threadobj = this.all.get(id)
       let new_thread = threadmap[id]
       if (threadobj == null) {
@@ -31,15 +31,15 @@ export class ThreadManager {
   }
 }
 
-export enum ThreadEntryType { single, top, middle, bottom}
+export enum ThreadEntryType { single, top, middle, bottom }
 export class ThreadEntry {
   messageID: string
   type: ThreadEntryType
   message: Message
 
-  constructor(public thread: Thread, threadEntry: Server.IMessageEntry) {
+  constructor(public thread: Thread, threadEntry: MailpileInterfaces.IMessageEntry) {
     this.messageID = threadEntry[0]
-    switch( threadEntry[1] ) {
+    switch (threadEntry[1]) {
       case "": this.type = ThreadEntryType.single;
       case "r": this.type = ThreadEntryType.top;
       case "├": this.type = ThreadEntryType.middle;
@@ -56,7 +56,7 @@ export class Thread {
   constructor(public ID: string, public manager: ThreadManager) {
   }
 
-  update(thread: Server.IMessageThread) {
-    this.entries = thread.map( entry => new ThreadEntry( this, entry) )
+  update(thread: MailpileInterfaces.IMessageThread) {
+    this.entries = thread.map(entry => new ThreadEntry(this, entry))
   }
 }

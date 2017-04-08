@@ -1,6 +1,5 @@
 // http://ionicframework.com/docs/v2/theming/
 
-
 // App Global Sass
 // --------------------------------------------------
 // Put style rules here that you want to apply globally. These
@@ -15,7 +14,6 @@
 // for the .md, .ios, or .wp mode classes. The mode class is
 // automatically applied to the <body> element in the app.
 
-
 $color-error: #ff3d00;
 $color-warning: #ff8a00;
 $color-info: #0085ff;
@@ -29,25 +27,24 @@ $color-read: #fbfbfb;
 $color-badge: #dedede;
 $color-badge-font: #000000;
 
-
 $font-size-small: 8pt;
 $font-size-medium: 10pt;
 $font-size-large: 12pt;
 
 .toast-error {
   .toast-container {
-    background-color: $color-error
+    background-color: $color-error;
   }
 }
 
 .toast-warning {
   .toast-container {
-    background-color: $color-warning
+    background-color: $color-warning;
   }
 }
 
 .toast-info {
   .toast-container {
-    background-color: $color-info
+    background-color: $color-info;
   }
 }

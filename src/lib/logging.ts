@@ -1,10 +1,9 @@
-// import {bindMethods} from './'
 
-export enum LogLevel {TRACE, DEBUG, INFO, WARN, ERROR}
+export enum LogLevel { TRACE, DEBUG, INFO, WARN, ERROR }
 
 class Log {
 
-  private  _filter: string[] = []
+  private _filter: string[] = []
   public level: LogLevel = LogLevel.DEBUG;
 
   constructor() {
@@ -16,7 +15,7 @@ class Log {
     }
 
     let tagstr: string = ""
-    if (tags!=null) {
+    if (tags != null) {
       if (!Array.isArray(tags)) {
         tags = [tags]
       }
@@ -38,14 +37,14 @@ class Log {
     }
 
     let date = new Date()
-    console.log( `%c ${date.toLocaleString()} ${LogLevel[level]} [${tagstr}]`, `color:${color};`, ...msg, )
+    console.log(`%c ${date.toLocaleString()} ${LogLevel[level]} [${tagstr}]`, `color:${color};`, ...msg, )
   }
 
-  public error = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.ERROR, 'red', tags, ...msg)};
-  public warn = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.WARN, '#e08e02', tags, ...msg)};
-  public info = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.INFO, 'green', tags, ...msg)};
-  public debug = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.DEBUG, 'blue', tags, ...msg)};
-  public trace = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.TRACE, '#e3e301', tags, ...msg)};
+  public error = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.ERROR, 'red', tags, ...msg) };
+  public warn = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.WARN, '#e08e02', tags, ...msg) };
+  public info = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.INFO, 'green', tags, ...msg) };
+  public debug = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.DEBUG, 'blue', tags, ...msg) };
+  public trace = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.TRACE, '#e3e301', tags, ...msg) };
 
   public clearFilter() {
     this._filter = []
@@ -66,7 +65,7 @@ function _window(): any {
 _window().log = log
 _window().loglevel = LogLevel
 _window().logtest = () => {
-  let testobj = {a: 1, b: { c: 2}};
+  let testobj = { a: 1, b: { c: 2 } };
   log.error('test', 'something very bad happened!', testobj)
   log.warn('test', 'something bad happened!', testobj)
   log.info(['test', 'connection'], 'something happened!', testobj)

@@ -2,8 +2,8 @@
 export class DerivedError extends Error {
   constructor(public message: string, public details: any = 'No further details available', public tags: string[] = []) {
     super(message)
-    this.name =  this.constructor.name
-    console.log('Concluded name:',this.name)
+    this.name = this.constructor.name
+    console.log('Concluded name:', this.name)
     let defaultTags = _defaultTags[this.constructor.name]
     if (defaultTags != null) {
       this.tags = this.tags.concat(defaultTags)
@@ -12,7 +12,7 @@ export class DerivedError extends Error {
   }
 
   toString(): string {
-    return this.name+ ': '+this.message
+    return this.name + ': ' + this.message
   }
 }
 
@@ -22,11 +22,11 @@ const _defaultTags = {
   AuthenticationError: ['authentication'],
 };
 
-export class RuntimeError extends DerivedError {};
-export class ConnectionError extends DerivedError {};
-export class AuthenticationError extends DerivedError {};
+export class RuntimeError extends DerivedError { };
+export class ConnectionError extends DerivedError { };
+export class AuthenticationError extends DerivedError { };
 export class WrappingError extends DerivedError {
-  constructor(public message: string, public details: any = 'No further details available', name: string=null , public tags: string[] = []) {
+  constructor(public message: string, public details: any = 'No further details available', name: string = null, public tags: string[] = []) {
     super(message, details, tags)
     if (name != null) {
       this.name = name
@@ -46,9 +46,9 @@ export namespace error {
     if (err instanceof Error) {
       return err;
     }
-    let message='wrapping error object that is not of type "Error"'
+    let message = 'wrapping error object that is not of type "Error"'
     let name = err.name
-    if (err.message != null ) {
+    if (err.message != null) {
       message = err.message
     }
     return new WrappingError(message, err, name)

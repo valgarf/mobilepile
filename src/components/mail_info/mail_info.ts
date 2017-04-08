@@ -1,18 +1,12 @@
 import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
-import {NavController, ToastController} from 'ionic-angular';
-import {Observable, BehaviorSubject} from 'rxjs/Rx'
 import {observable, computed} from 'mobx'
 
-import {dateFormat} from 'dateformat'
-import * as Server from '@root/server'
-import * as Lib from '@root/lib'
-import * as Comp from '@root/components'
-import { Store, Thread, Message, Tag } from '@root/store'
+import {Store, Thread, Message} from '@root/store'
 
 @Component({
   selector: 'mail-info',
   templateUrl: 'mail_info.html',
-  changeDetection:  ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MailInfoComponent {
   @Output() open: EventEmitter<any> = new EventEmitter<any>();
@@ -22,7 +16,7 @@ export class MailInfoComponent {
   get threadID(): string {
     return this._threadID
   }
-  @Input() set threadID( value: string ) {
+  @Input() set threadID(value: string) {
     this._threadID = value
     if (this.thread != null)
       this._messageID = this.thread.entries[0].messageID
@@ -30,7 +24,7 @@ export class MailInfoComponent {
   get messageID(): string {
     return this._messageID
   }
-  @Input() set messageID( value: string ) {
+  @Input() set messageID(value: string) {
     this._messageID = value
     if (this.message != null) {
       this._threadID = this.message.threadID
@@ -75,7 +69,7 @@ export class MailInfoComponent {
     return 'black'
   }
 
-  private _handle
+  // private _handle
   constructor(private store: Store) {
     // this._handle = autorun( () )
   }

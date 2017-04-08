@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core'
 
-import {Server, IData} from '@root/server'
+import {Server, MailpileInterfaces} from '@root/server'
 
 import {TagManager} from './tags'
 import {AddressManager} from './addresses'
@@ -30,7 +30,7 @@ export class Store {
 
   }
 
-  updateStore(data: IData) {
+  updateStore(data: MailpileInterfaces.IData) {
     this.addresses.update(data.addresses)
     this.tags.update(data.tags)
     this.messages.update(data.metadata)

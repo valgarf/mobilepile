@@ -1,13 +1,14 @@
-import { observable, computed, autorun, intercept, action, ObservableMap } from 'mobx'
-import * as Server from '@root/server'
+import {observable, autorun, action, ObservableMap } from 'mobx'
+
+import {MailpileInterfaces} from '@root/server'
 import {Store} from './store'
 
 export class AddressManager {
   @observable all: ObservableMap<Address> = new ObservableMap<Address>();
 
   constructor(public store: Store) {
-    autorun( () => {
-      console.log("MOBX ADDRESSES:", this.all.toJS() )
+    autorun(() => {
+      console.log("MOBX ADDRESSES:", this.all.toJS())
     })
   }
 
@@ -15,8 +16,8 @@ export class AddressManager {
     return this.all.get(id)
   }
 
-  @action public update( adrmap: { [id:string]: Server.IAddress }) {
-    Object.keys(adrmap).forEach( id => {
+  @action public update(adrmap: { [id: string]: MailpileInterfaces.IAddress }) {
+    Object.keys(adrmap).forEach(id => {
       let adrobj = this.all.get(id)
       let new_adr = adrmap[id]
       if (adrobj == null) {
@@ -36,7 +37,7 @@ export class Address {
   constructor(public ID: string, private manager: AddressManager) {
   }
 
-  update(adr: Server.IAddress) {
+  update(adr: MailpileInterfaces.IAddress) {
     this.address = adr.address;
     this.name = adr.fn;
   }

@@ -8,7 +8,7 @@ export * from './logging'
  * For other implementations and discussions see:
  * http://stackoverflow.com/questions/5999998/how-can-i-check-if-a-javascript-variable-is-function-type
  */
-export function isFunction(obj):boolean {
+export function isFunction(obj): boolean {
   return !!(obj && obj.constructor && obj.call && obj.apply) // !! converts to a boolean
 }
 
@@ -23,9 +23,9 @@ export function isFunction(obj):boolean {
  *
  * @param  {Object} self - the instance to bind to
  */
-export function bindMethods(self: Object) : void {
+export function bindMethods(self: Object): void {
   var cls = Object.getPrototypeOf(self);
-  for (let funName of Object.getOwnPropertyNames(cls) ) {
+  for (let funName of Object.getOwnPropertyNames(cls)) {
     let fun = self[funName]
     if (fun && isFunction(fun.bind)) {
       self[funName] = fun.bind(self);
@@ -41,7 +41,7 @@ export function bindMethods(self: Object) : void {
  * @returns {void}
  */
 export async function delay(time: number): Promise<void> {
-  return new Promise<void>( (resolve, reject) => {
+  return new Promise<void>((resolve, reject) => {
     setTimeout(resolve, time)
   })
 }

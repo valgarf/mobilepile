@@ -1,5 +1,5 @@
 <ion-content *mobxAutorun>
-  <ion-list class='taglistRoot' *ngFor="let tags of this.tagsCombined" >
+  <ion-list class='taglistRoot' *ngFor="let tags of this.tagsCombined">
     <tagitem *ngFor="let tag of tags" [tag]="tag" [level]="0" (select)="onSelect($event)"></tagitem>
   </ion-list>
 </ion-content>

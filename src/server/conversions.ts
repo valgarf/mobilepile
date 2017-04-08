@@ -30,9 +30,9 @@ export function str2color(col: string): string {
   if (col.startsWith("#"))
     return col;
   try {
-    let idx: number = +col.slice(0,2) - 1
+    let idx: number = +col.slice(0, 2) - 1
     return _colors[idx]
-  } catch(any) {
+  } catch (any) {
     return undefined
   }
 }

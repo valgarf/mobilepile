@@ -1,9 +1,8 @@
-import { observable, computed, autorun, intercept, action, ObservableMap } from 'mobx'
-// import {toStream} from 'mobx-utils'
-import {Observable, Subject, BehaviorSubject, Observer} from 'rxjs/Rx'
+import {observable, autorun} from 'mobx'
+import {Subject, BehaviorSubject} from 'rxjs/Rx'
 
-import * as Server from '@root/server'
 import * as Lib from '@root/lib'
+import {Server} from '@root/server'
 import {Store} from './store'
 
 export class StateManager {
@@ -17,7 +16,7 @@ export class StateManager {
 
   messageObs: Subject<UIMessage>;
 
-  constructor(public store: Store, public server: Server.Server) {
+  constructor(public store: Store, public server: Server) {
     Lib.bindMethods(this)
     this.authenticatedObs = new BehaviorSubject(this.authenticated)
     this.messageObs = new Subject()
@@ -35,15 +34,15 @@ export class StateManager {
         return;
       }
       try {
-        Lib.log.debug(['pulse'],'PULSE')
+        Lib.log.debug(['pulse'], 'PULSE')
         this.pulse.next(true)
         await this.store.refresh()
         timeoutHandle = setTimeout(heartbeat, 20000)
       }
-      catch(err) {
+      catch (err) {
         err = Lib.error.ensureErrorObject(err)
-        if (err instanceof Lib.ConnectionError || err instanceof Lib.AuthenticationError) {
-          this.authenticated=false;
+        if (err instanceof Lib.ConnectionError || err instanceof Lib.AuthenticationError || (err.tags != null && err.tags.includes("connection"))) {
+          this.authenticated = false;
         }
         Lib.error.attachTags(err, ['pulse'])
         this.handleError(err)
@@ -52,7 +51,7 @@ export class StateManager {
         }
       }
     }
-    autorun( () => {
+    autorun(() => {
       this.authenticatedObs.next(this.authenticated)
       if (this.authenticated) {
         heartbeat();
@@ -64,8 +63,8 @@ export class StateManager {
   }
 
   async login(): Promise<boolean> {
-    this.server.url=this.url
-    this.server.password=this.password
+    this.server.url = this.url
+    this.server.password = this.password
     try {
       let result = await this.server.login()
       if (this.authenticated == false && result == true) {
@@ -81,7 +80,7 @@ export class StateManager {
     }
   }
 
-  handleError( error: any ) {
+  handleError(error: any) {
     let tags = []
     if (error.tags != null) {
       tags = error.tags
@@ -101,22 +100,22 @@ export class StateManager {
   }
 }
 
-export enum UIMessageType { info, warning, error}
+export enum UIMessageType { info, warning, error }
 export class UIMessage {
   readonly details: any[]
-  constructor(readonly type: UIMessageType=UIMessageType.error, readonly title: string="", readonly description: string="",  ...details: any[]) {
+  constructor(readonly type: UIMessageType = UIMessageType.error, readonly title: string = "", readonly description: string = "", ...details: any[]) {
     this.details = details
   }
 
-  static info(title: string, description: string, ...details:any[]): UIMessage {
+  static info(title: string, description: string, ...details: any[]): UIMessage {
     return new UIMessage(UIMessageType.info, title, description, ...details)
   }
 
-  static warning(title: string, description: string, ...details:any[]): UIMessage {
+  static warning(title: string, description: string, ...details: any[]): UIMessage {
     return new UIMessage(UIMessageType.warning, title, description, ...details)
   }
 
-  static error(title: string, description: string, ...details:any[]): UIMessage {
+  static error(title: string, description: string, ...details: any[]): UIMessage {
     return new UIMessage(UIMessageType.error, title, description, ...details)
   }
 
@@ -130,12 +129,12 @@ export class UIMessage {
     // let details = err.details
     // if (details == null)
     // {
-      // details = []
+    // details = []
     // }
     return UIMessage.error(name, msg)
   }
 
   toString(): string {
-    return this.title+': '+this.description
+    return this.title + ': ' + this.description
   }
 }

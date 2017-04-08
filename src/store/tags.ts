@@ -1,22 +1,22 @@
+import {observable, computed, autorun, action, ObservableMap} from 'mobx'
 import {sprintf} from 'sprintf-js'
 
-import { observable, computed, autorun, action, ObservableMap } from 'mobx'
-import * as Server from '@root/server'
+import {MailpileInterfaces, Server, str2color} from '@root/server'
 import {Store} from './store'
 
 export class TagManager {
   @observable all: ObservableMap<Tag> = new ObservableMap<Tag>();
   @observable sortedIDs: string[] = []
   @computed get sorted(): Tag[] {
-    return this.sortedIDs.map( id => this.getByID(id))
+    return this.sortedIDs.map(id => this.getByID(id))
   }
-  @computed get root():Tag[] {
-    return this.sorted.filter( tag => tag.is_root )
+  @computed get root(): Tag[] {
+    return this.sorted.filter(tag => tag.is_root)
   }
 
-  constructor(public store: Store, private _server: Server.Server) {
-    autorun( () => {
-      console.log("MOBX TAGS:", this.root.filter((tag) => tag.visible ))
+  constructor(public store: Store, private _server: Server) {
+    autorun(() => {
+      console.log("MOBX TAGS:", this.root.filter((tag) => tag.visible))
     })
   }
 
@@ -31,8 +31,8 @@ export class TagManager {
     this.update(tagReply.tags)
   }
 
-  @action public update(taglist: Server.ITag[] | {[tid:string]: Server.ITag}) {
-    let updateTag = ( tag: Server.ITag) => {
+  @action public update(taglist: MailpileInterfaces.ITag[] | { [tid: string]: MailpileInterfaces.ITag }) {
+    let updateTag = (tag: MailpileInterfaces.ITag) => {
       let tagobj = this.getByID(tag.tid)
       if (tagobj == null) {
         tagobj = new Tag(tag.tid, this)
@@ -45,17 +45,17 @@ export class TagManager {
       for (let tag of taglist) {
         updateTag(tag)
       }
-      (this.sortedIDs as any).replace( taglist.map( tag => tag.tid) )
+      (this.sortedIDs as any).replace(taglist.map(tag => tag.tid))
     }
     else {
-        Object.keys(taglist).forEach( id => updateTag(taglist[id]) )
+      Object.keys(taglist).forEach(id => updateTag(taglist[id]))
     }
   }
 }
 
 
 // export enum TagType { mailbox, tag, tagged, profile, blank, ham, attribute, forwarded, inbox, read, unread, replied, drafts, outbox}
-export enum TagDisplayType {invisible, priority, tag}
+export enum TagDisplayType { invisible, priority, tag }
 export class Tag {
 
   @observable display: TagDisplayType = TagDisplayType.invisible;
@@ -73,7 +73,7 @@ export class Tag {
     return this.manager.getByID(this.parentID)
   }
   @computed get children(): Tag[] {
-    return this.manager.sorted.filter( child => child.parentID == this.ID )
+    return this.manager.sorted.filter(child => child.parentID == this.ID)
   };
   @computed get is_root(): boolean {
     return this.parentID == "";
@@ -82,7 +82,7 @@ export class Tag {
     return this.display != TagDisplayType.invisible;
   };
   @computed get search_expression(): string {
-    return sprintf(this.search_terms, {slug: this.slug})
+    return sprintf(this.search_terms, { slug: this.slug })
   };
   @computed get is_mailbox(): boolean {
     return this.type == "mailbox"
@@ -91,11 +91,11 @@ export class Tag {
   constructor(public ID: string, private manager: TagManager) {
   }
 
-  @action update(tag: Server.ITag) {
-    switch(tag.display) {
-      case 'invisible': this.display=TagDisplayType.invisible; break;
-      case 'priority': this.display=TagDisplayType.priority; break;
-      case 'tag': this.display=TagDisplayType.tag; break;
+  @action update(tag: MailpileInterfaces.ITag) {
+    switch (tag.display) {
+      case 'invisible': this.display = TagDisplayType.invisible; break;
+      case 'priority': this.display = TagDisplayType.priority; break;
+      case 'tag': this.display = TagDisplayType.tag; break;
       default: throw new Error("Tag Display Type not implemented:" + tag.display);
     }
     // switch(tag.type) {
@@ -118,7 +118,7 @@ export class Tag {
     this.type = tag.type
     this.icon = tag.icon;
     this.label = tag.label;
-    this.label_color = Server.str2color(tag.label_color);
+    this.label_color = str2color(tag.label_color);
     this.name = tag.name;
     this.search_terms = tag.search_terms;
     this.slug = tag.slug;

@@ -4,20 +4,21 @@ page-login {
   }
 
   .center {
-    display: block;
-    margin-left:auto;
-    margin-right: auto;
-    width: 80%;
-    margin-top: 10%;
-    margin-bottom: 10%
+    display      : block;
+    margin-left  : auto;
+    margin-right : auto;
+    width        : 80%;
+    margin-top   : 10%;
+    margin-bottom: 10%;
   }
 
-  img.left{
-    width: percentage(0.35)
+  img.left {
+    width: percentage(0.35);
   }
-  img.right{
+
+  img.right {
     margin-left: 2%;
-    width: percentage(0.60)
+    width      : percentage(0.60);
   }
 
   .scroll-content {
@@ -25,5 +26,3 @@ page-login {
   }
 
 }
-//51.359
-//116.926

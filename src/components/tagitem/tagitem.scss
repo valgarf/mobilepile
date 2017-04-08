@@ -1,19 +1,21 @@
 tagitem {
   div.icon {
     vertical-align: middle;
-    display: inline-block;
+    display       : inline-block;
   }
-  img.icon{
+
+  img.icon {
     position: relative;
   }
 
   div.arrow {
     vertical-align: middle;
-    display: inline-block;
+    display       : inline-block;
   }
-  img.arrow{
+
+  img.arrow {
     background-color: #dedede;
-    position: relative;
+    position        : relative;
   }
 
   span.tagname {

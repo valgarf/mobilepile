@@ -1,12 +1,12 @@
-import { NgModule, ErrorHandler } from '@angular/core';
-import { IonicApp, IonicModule, IonicErrorHandler } from 'ionic-angular';
-import { MyApp } from './app.component';
-import { MobxAngularModule } from 'mobx-angular';
+import {NgModule, ErrorHandler} from '@angular/core';
+import {IonicApp, IonicModule, IonicErrorHandler} from 'ionic-angular';
+import {MobxAngularModule} from 'mobx-angular';
 
 import * as Pages from '@root/pages';
 import * as Components from '@root/components'
-import { Server } from '@root/server';
-import { Store } from '@root/store'
+import {Server} from '@root/server';
+import {Store} from '@root/store'
+import {MyApp} from './app.component';
 
 @NgModule({
   declarations: [
@@ -31,10 +31,10 @@ import { Store } from '@root/store'
     Pages.TagmenuPage
   ],
   providers: [
-    {provide: ErrorHandler, useClass: IonicErrorHandler},
+    { provide: ErrorHandler, useClass: IonicErrorHandler },
     Components.MessageHandler,
     Server,
     Store,
   ]
 })
-export class AppModule {}
+export class AppModule { }
