@@ -4,6 +4,9 @@ import {ToastController, AlertController} from 'ionic-angular'
 import * as Lib from '@root/lib'
 import {Store, UIMessage, UIMessageType} from '@root/store'
 
+/**
+ * Handles toast messages: Waits for new UI messages to be pushed to the store.state message observable and presents them to the user.
+ */
 @Injectable()
 export class MessageHandler {
   // private _toastHidden: BehaviorSubject<boolean> = new BehaviorSubject(true)
