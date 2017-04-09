@@ -65,7 +65,7 @@ export class Thread {
 
   async update(thread: MailpileInterfaces.IMessageThread): Promise<void> {
     this.entries = thread.map(entry => new ThreadEntry(this, entry)) //TODO recreating is obviously wasteful...
-    //TODO not very nice, we fetch further data during the update procedure. Would be good to get all the relevant data in the first run
+    //TODO not very nice, we fetch further data during the update procedure. Would be good to get all the relevant data in the first run. Get the 'full' parameter of the query string to work?
     await Promise.all(this.entries.map(async (e) => {
       if (e.message == null) {
         await this.manager.store.messages.loadMessage(e.messageID)

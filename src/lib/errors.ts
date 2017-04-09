@@ -39,6 +39,7 @@ function addTags(defaultTags: string[] = []) {
 @addTags(['unspecific']) export class RuntimeError extends DerivedError { };
 @addTags(['connection']) export class ConnectionError extends DerivedError { };
 @addTags(['authentication']) export class AuthenticationError extends DerivedError { };
+@addTags(['data', 'server']) export class DataUnavailableError extends DerivedError { };
 @addTags(['type']) export class UnknownTypeError extends DerivedError { };
 
 export class WrappingError extends DerivedError {

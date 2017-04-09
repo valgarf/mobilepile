@@ -8,6 +8,10 @@ import {Server} from '@root/server';
 import {Store} from '@root/store'
 import {MyApp} from './app.component';
 
+
+/**
+ * This is the main module of the application, it makes all necessary pages, components and providers available and loads the root component (MyApp)
+ */
 @NgModule({
   declarations: [
     MyApp,
@@ -34,9 +38,9 @@ import {MyApp} from './app.component';
   ],
   providers: [
     { provide: ErrorHandler, useClass: IonicErrorHandler },
-    Components.MessageHandler,
-    Server,
-    Store,
+    Components.MessageHandler, // for showing Toasts on erros
+    Server, // abstraction of actual http requests
+    Store, // local storage and cache for server data and local state
   ]
 })
 export class AppModule { }

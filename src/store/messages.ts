@@ -32,8 +32,16 @@ export class MessageManager {
     })
   }
 
+  private _failedDownload = []; //cache all unavailable ids -> prevent retrying
   public async loadMessage(id: string): Promise<void> {
+    if (this._failedDownload.indexOf(id) > -1) {
+      throw new Lib.DataUnavailableError(`Cannot obtain message with id '${id}' from server`, this.getByID(id), ['message'], null, false, false)
+    }
     let result = await this.server.getMessage(id)
+    if (result.data == null) {
+      this._failedDownload.push(id)
+      throw new Lib.DataUnavailableError(`Cannot obtain message with id '${id}' from server`, [result, this.getByID(id)], ['message'], null, false)
+    }
     await this.store.updateStore(result.data)
   }
 }
@@ -70,16 +78,16 @@ export class Message {
   @observable threadID: string = undefined;
 
   @computed get from(): Address {
-    return this.manager.store.addresses.getByID(this.fromID)
+    return this._manager.store.addresses.getByID(this.fromID)
   }
   @computed get to(): Address[] {
-    return this.toIDS.map(id => this.manager.store.addresses.getByID(id))
+    return this.toIDS.map(id => this._manager.store.addresses.getByID(id))
   }
   @computed get tags(): Tag[] {
-    return this.tagIDS.map(id => this.manager.store.tags.getByID(id))
+    return this.tagIDS.map(id => this._manager.store.tags.getByID(id))
   }
   @computed get thread(): Thread {
-    return this.manager.store.threads.getByID(this.threadID)
+    return this._manager.store.threads.getByID(this.threadID)
   }
   @computed get text_complete(): string {
     let result = ""
@@ -96,7 +104,7 @@ export class Message {
     return result
   }
 
-  constructor(public ID: string, private manager: MessageManager) {
+  constructor(public ID: string, private _manager: MessageManager) {
   }
 
   @action update(msg: MailpileInterfaces.IMessage | MailpileInterfaces.IMessageMetadata) {
@@ -121,6 +129,6 @@ export class Message {
   }
 
   public async loadMessage(): Promise<void> {
-    await this.manager.loadMessage(this.ID)
+    await this._manager.loadMessage(this.ID)
   }
 }

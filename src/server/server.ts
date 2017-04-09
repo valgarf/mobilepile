@@ -102,6 +102,7 @@ export class Server {
     let body = new URLSearchParams();
     body.set('q', query);
     body.set('order', order);
+    body.set('full', 'true'); //no effect?
     body.set('start', start.toString());
     body.set('end', end.toString());
     let reply = await this._request('search', body)
@@ -117,6 +118,9 @@ export class Server {
     let body = new URLSearchParams();
     body.set('mid', mid);
     let reply = await this._request('message', body)
+    if ((<MailpileInterfaces.IResultSearch>reply.result).data == null) {
+      Lib.log.debug(['message', 'data', 'server'], 'Message download failed, reply:', reply)
+    }
     return <MailpileInterfaces.IResultSearch>reply.result
   }
 }

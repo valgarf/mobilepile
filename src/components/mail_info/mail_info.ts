@@ -4,17 +4,21 @@ import {observable, computed} from 'mobx'
 import {Store, Thread, Message} from '@root/store'
 
 
+/**
+ * Shows information on a mail like sender, subject and start of the text. It is a list item and should be used inside of <ion-list>
+ */
 @Component({
   selector: 'mail-info',
   templateUrl: 'mail_info.html',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class MailInfoComponent {
-  @Output() open: EventEmitter<any> = new EventEmitter<any>();
-  @Input() showThreadInfo: boolean = true;
+  @Output() open: EventEmitter<any> = new EventEmitter<any>(); //emitted when this Component is clicked, results in opening the mail, events are bubbled up to the page
+  @Input() showThreadInfo: boolean = true; // wether or not this component represents a whole thread (using the latest mail) or just a single mail
 
   @observable private _threadID: string = "";
   @observable private _messageID: string = "";
+
   get threadID(): string {
     return this._threadID
   }
@@ -44,6 +48,9 @@ export class MailInfoComponent {
     return null
   }
 
+  /**
+   * to save space only relevant parts of the datetime are shown, that is: the time if it is today, otherwise just the day and month, as well as the year if it differs.
+   */
   @computed get dateFormatString(): string {
     if (this.message == null) {
       return "dd.MM.yyyy";
@@ -59,6 +66,9 @@ export class MailInfoComponent {
     return "H:mm";
   }
 
+  /**
+   * Get the color corresponding to the mailbox this message belongs to  
+   */
   @computed get color(): string {
     if (this.message == null) {
       return 'black'

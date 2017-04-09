@@ -27,7 +27,7 @@ export class MailViewPage {
   private _handle = null;
   constructor(private params: NavParams, private store: Store, private sanitizer: DomSanitizer) {
     this.messageID = params.get('mid')
-    this._handle = autorun(() => { if (this.message != null) this.message.loadMessage() })
+    this._handle = autorun(() => { if (this.message != null) this.message.loadMessage().catch(this.store.state.handleError) })
   }
 
   public ionViewWillUnload() {
