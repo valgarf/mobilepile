@@ -1,5 +1,5 @@
 import {Component, Input, Output, EventEmitter, ChangeDetectionStrategy} from '@angular/core';
-import {computed} from 'mobx'
+import {action, computed} from 'mobx'
 
 import {Tag} from '@root/store'
 
@@ -35,7 +35,7 @@ export class TagitemComponent {
     return this.tag.children.length > 0 ? 'visible' : 'hidden'
   }
 
-  open() {
+  @action open() {
     if (this.tag.children.length == 0) {
       this.tag.open = false
     }

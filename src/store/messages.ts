@@ -1,17 +1,18 @@
-import { observable, computed, autorun, action, ObservableMap } from 'mobx'
+import {observable, computed, autorun, action, ObservableMap} from 'mobx'
 
-import { MailpileInterfaces, Server } from '@root/server'
-import { Store } from './store'
-import { Address } from './addresses'
-import { Tag } from './tags'
-import { Thread } from './threads'
+import * as Lib from '@root/lib'
+import {MailpileInterfaces, Server} from '@root/server'
+import {Store} from './store'
+import {Address} from './addresses'
+import {Tag} from './tags'
+import {Thread} from './threads'
 
 export class MessageManager {
   @observable all: ObservableMap<Message> = new ObservableMap<Message>();
 
   constructor(public store: Store, public server: Server) {
     autorun(() => {
-      console.log("MOBX MESSAGES:", this.all.toJS())
+      Lib.log.debug(['data', 'change', 'autorun', 'message'], "messages:", this.all.toJS())
     })
   }
 
@@ -29,6 +30,11 @@ export class MessageManager {
       }
       msgobj.update(new_msg)
     })
+  }
+
+  public async loadMessage(id: string): Promise<void> {
+    let result = await this.server.getMessage(id)
+    await this.store.updateStore(result.data)
   }
 }
 
@@ -114,8 +120,7 @@ export class Message {
     }
   }
 
-  public async loadMessage() {
-    let result = await this.manager.server.getMessage(this.ID)
-    this.manager.store.updateStore(result.data)
+  public async loadMessage(): Promise<void> {
+    await this.manager.loadMessage(this.ID)
   }
 }

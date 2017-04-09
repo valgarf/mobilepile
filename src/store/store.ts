@@ -30,16 +30,18 @@ export class Store {
 
   }
 
-  updateStore(data: MailpileInterfaces.IData) {
+  async updateStore(data: MailpileInterfaces.IData): Promise<void> {
     this.addresses.update(data.addresses)
     this.tags.update(data.tags)
     this.messages.update(data.metadata)
     this.messages.update(data.messages)
-    this.threads.update(data.threads)
+    return await this.threads.update(data.threads)
   }
 
   async refresh(): Promise<void> {
-    await this.tags.refresh()
-    await this.search.refresh()
+    await Promise.all([
+      this.tags.refresh(),
+      this.search.refresh(),
+    ])
   }
 }

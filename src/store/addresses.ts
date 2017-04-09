@@ -1,5 +1,6 @@
 import {observable, autorun, action, ObservableMap } from 'mobx'
 
+import * as Lib from '@root/lib'
 import {MailpileInterfaces} from '@root/server'
 import {Store} from './store'
 
@@ -8,7 +9,7 @@ export class AddressManager {
 
   constructor(public store: Store) {
     autorun(() => {
-      console.log("MOBX ADDRESSES:", this.all.toJS())
+      Lib.log.debug(['data', 'change', 'autorun', 'address'], "addresses:", this.all.toJS())
     })
   }
 

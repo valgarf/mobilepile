@@ -1,4 +1,4 @@
-import {observable, autorun} from 'mobx'
+import {action, runInAction, computed, autorun} from 'mobx'
 import {Subject, BehaviorSubject} from 'rxjs/Rx'
 
 import * as Lib from '@root/lib'
@@ -7,7 +7,14 @@ import {Store} from './store'
 
 export class StateManager {
 
-  @observable authenticated: boolean = false;
+  // @observable authenticated: boolean = false;
+  @computed get authenticated(): boolean {
+    return this.server.authenticated
+  }
+  set authenticated(value: boolean) {
+    this.server.authenticated = value
+  }
+
   authenticatedObs: BehaviorSubject<boolean>;
   pulse: Subject<boolean>;
 
@@ -42,7 +49,7 @@ export class StateManager {
       catch (err) {
         err = Lib.error.ensureErrorObject(err)
         if (err instanceof Lib.ConnectionError || err instanceof Lib.AuthenticationError || (err.tags != null && err.tags.includes("connection"))) {
-          this.authenticated = false;
+          runInAction(() => { this.authenticated = false })
         }
         Lib.error.attachTags(err, ['pulse'])
         this.handleError(err)
@@ -62,7 +69,7 @@ export class StateManager {
     })
   }
 
-  async login(): Promise<boolean> {
+  @action async login(): Promise<boolean> {
     this.server.url = this.url
     this.server.password = this.password
     try {
@@ -70,11 +77,11 @@ export class StateManager {
       if (this.authenticated == false && result == true) {
         await Lib.delay(1000) // otherwise the following requests will fail, the server takes a while
       }
-      this.authenticated = result;
+      runInAction(() => { this.authenticated = result })
       return result;
     }
     catch (err) {
-      this.authenticated = false;
+      runInAction(() => { this.authenticated = false })
       Lib.error.attachTags(err, ['login', 'authentication'])
       throw err
     }
@@ -85,17 +92,24 @@ export class StateManager {
     if (error.tags != null) {
       tags = error.tags
     }
-    if (error.details != null) {
-      Lib.log.error(tags, error.toString(), error.details, error)
-    }
-    else {
-      Lib.log.error(tags, error.toString(), error)
+
+    if (error.log == null || error.log == true) {
+      if (error.details != null) {
+        Lib.log.error(tags, error.toString(), error.details, error)
+      }
+      else {
+        Lib.log.error(tags, error.toString(), error)
+      }
     }
 
-    if (error instanceof Error) {
-      let msg = UIMessage.fromError(error)
-      console.log(msg)
-      this.messageObs.next(msg)
+    if (error.show == null || error.show == true) {
+      if (error instanceof Error) {
+        let msg = UIMessage.fromError(error)
+        this.messageObs.next(msg)
+      }
+      else if (error.log == null || error.log == true) {
+        Lib.log.warn(['follow-up'], 'Not an Error object, not showing a UI message')
+      }
     }
   }
 }
@@ -125,13 +139,14 @@ export class UIMessage {
       name = err.constructor.name
     }
     let msg = err.message
-    // put stacktrace into details?
-    // let details = err.details
-    // if (details == null)
-    // {
-    // details = []
-    // }
-    return UIMessage.error(name, msg)
+    let details = (err as any).details
+    // TODO put stacktrace into details?
+    if (details != null) {
+      return UIMessage.error(name, msg, details)
+    }
+    else {
+      return UIMessage.error(name, msg)
+    }
   }
 
   toString(): string {

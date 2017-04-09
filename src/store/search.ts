@@ -1,6 +1,7 @@
-import {observable, computed, autorun, reaction, action, ObservableMap} from 'mobx'
+import {observable, computed, autorun, action, runInAction, reaction, ObservableMap} from 'mobx'
 import * as math from 'mathjs'
 
+import * as Lib from '@root/lib'
 import {MailpileInterfaces, Server} from '@root/server'
 import {Store} from './store'
 import {Thread} from './threads'
@@ -12,7 +13,7 @@ export class SearchManager {
 
   constructor(public store: Store, public server: Server) {
     autorun(() => {
-      console.log("MOBX ADDRESSES:", this.all.toJS())
+      Lib.log.debug(['data', 'change', 'autorun', 'search'], "all searches:", this.all.toJS())
     })
   }
 
@@ -40,8 +41,8 @@ export class SearchManager {
     return search
   }
 
-  @action public refresh(): Promise<boolean> {
-    return Promise.all(this.all.values().map(search => search.refresh())).then(res => res.every(v => v))
+  @action public async refresh(): Promise<void> {
+    await Promise.all(this.all.values().map(search => search.refresh()))
   }
 }
 
@@ -68,32 +69,42 @@ export class Search {
 
   constructor(private manager: SearchManager, readonly query: string, readonly order: string) {
     autorun(() => {
-      console.log('SEARCHED THREADS:', this.threads)
+      Lib.log.debug(['data', 'change', 'autorun', 'search'], `threads for query '${query}' and order '${order}': `, this.threads)
     })
-    let i = 0
+    //TODO maybe make 'amount' private? then we do not have to listen to it anymore. Currently the changes only become active with the next refresh...
     this._handle = reaction((): any => {
       let result = {
         offset: this.offset,
-        amount: this.amount,
+        // amount: this.amount,
         active: this.active
       };
       return result;
-    }, this.refresh.bind(this))
+    }, (data) => {
+      Lib.log.trace(['autorun', 'search'], `triggering reaction for query '${query}' and order '${order}'`, data)
+      this.refresh().catch(this.manager.store.state.handleError)
+    }, {
+        compareStructural: true,
+        fireImmediately: true
+      })
   }
 
-  @action public loadMore(num: number): Promise<boolean> {
-    let promise = this.manager.server.searchOnce(this.query, this.order, this.offset + this.amount + 1, this.offset + this.amount + num)
-      .then(action((res: MailpileInterfaces.IResultSearch) => {
-        this.manager.store.updateStore(res.data)
-        this.messageIDs = this.messageIDs.concat(res.thread_ids) // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
-        this.amount += num
-        return true;
-      })).catch(() => false)
-    return promise
+  @action public async loadMore(num: number): Promise<void> {
+    runInAction(() => { this.amount += num })
+    let res: MailpileInterfaces.IResultSearch = await this.manager.server.searchOnce(this.query, this.order, this.offset + this.amount - num + 1, this.offset + this.amount)
+    let promise = this.manager.store.updateStore(res.data)
+    if (this.messageIDs.length == this.amount - num) {
+      runInAction(() => { this.messageIDs = this.messageIDs.concat(res.thread_ids) }) // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
+    }
+    else {
+      Lib.log.warn(['search', 'loading'], `loadMore was beaten by the refresh method.num to fetch: ${num}, expected total of ${this.amount} messages.We already have ${this.messageIDs.length} messages`,
+        this.messageIDs, res)
+    }
+
+    await promise;
   }
-  @action public refresh(): Promise<boolean> {
+  @action public async refresh(): Promise<void> {
     if (!this.active) {
-      return Promise.resolve(true)
+      return
     }
     // // ---- CODE used for joining multiple requests, we can just make one request
     // let promise_list = []
@@ -112,12 +123,10 @@ export class Search {
     //     return true
     //   })).catch( () => {return false})
     // // ---- END
-    return this.manager.server.searchOnce(this.query, this.order, this.offset + 1, this.offset + this.amount)
-      .then(action((res: MailpileInterfaces.IResultSearch) => {
-        this.manager.store.updateStore(res.data)
-        this.messageIDs = res.thread_ids // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
-        return true;
-      })).catch(() => false)
+    let res: MailpileInterfaces.IResultSearch = await this.manager.server.searchOnce(this.query, this.order, this.offset + 1, this.offset + this.amount)
+    let promise = this.manager.store.updateStore(res.data)
+    runInAction(() => { this.messageIDs = res.thread_ids }) // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
+    await promise
   }
 
   @action public activate() {

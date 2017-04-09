@@ -39,7 +39,7 @@ export class MailboxPage {
   }
 
   @action loadMore(infiniteScroll) {
-    this.search.loadMore(20).then(() => infiniteScroll.complete())
+    this.search.loadMore(20).then(() => infiniteScroll.complete()).catch(this.store.state.handleError)
   }
 
   open(mail: Message) {

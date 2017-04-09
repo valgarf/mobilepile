@@ -31,7 +31,6 @@ export class LoginPage {
     }
     this.allowSubmission = false
 
-    // console.log('LOGIN', this.url, this.password)
     let self = this
     this.store.state.url = this.url
     this.store.state.password = this.password

@@ -2,6 +2,7 @@ import {observable, autorun, action, computed, ObservableMap} from 'mobx'
 
 import {MailpileInterfaces} from '@root/server'
 
+import * as Lib from '@root/lib'
 import {Server} from '@root/server'
 import {Store} from './store'
 import {Message} from './messages'
@@ -11,7 +12,7 @@ export class ThreadManager {
 
   constructor(public store: Store, public server: Server) {
     autorun(() => {
-      console.log("MOBX THREADS:", this.all.toJS())
+      Lib.log.debug(['data', 'change', 'autorun', 'thread'], "all threads: ", this.all.toJS())
     })
   }
 
@@ -19,16 +20,16 @@ export class ThreadManager {
     return this.all.get(id)
   }
 
-  @action public update(threadmap: { [id: string]: MailpileInterfaces.IMessageThread }) {
-    Object.keys(threadmap).forEach(id => {
+  @action public async update(threadmap: { [id: string]: MailpileInterfaces.IMessageThread }): Promise<void> {
+    await Promise.all(Object.keys(threadmap).map(async (id: string): Promise<void> => {
       let threadobj = this.all.get(id)
       let new_thread = threadmap[id]
       if (threadobj == null) {
         threadobj = new Thread(id, this);
         this.all.set(id, threadobj);
       }
-      threadobj.update(new_thread)
-    })
+      await threadobj.update(new_thread)
+    }))
   }
 }
 
@@ -43,10 +44,11 @@ export class ThreadEntry {
   constructor(public thread: Thread, threadEntry: MailpileInterfaces.IMessageEntry) {
     this.messageID = threadEntry[0]
     switch (threadEntry[1]) {
-      case "": this.type = ThreadEntryType.single;
-      case "r": this.type = ThreadEntryType.top;
-      case "├": this.type = ThreadEntryType.middle;
-      case "└": this.type = ThreadEntryType.bottom;
+      case "": this.type = ThreadEntryType.single; break;
+      case "┌": this.type = ThreadEntryType.top; break;
+      case "├": this.type = ThreadEntryType.middle; break;
+      case "└": this.type = ThreadEntryType.bottom; break;
+      default: throw new Lib.UnknownTypeError(`The thread entry type '${threadEntry[1]}' is not known.`, threadEntry, ['thread', 'switch']);
     }
   }
 }
@@ -61,15 +63,13 @@ export class Thread {
   constructor(public ID: string, public manager: ThreadManager) {
   }
 
-  update(thread: MailpileInterfaces.IMessageThread) {
-    this.entries = thread.map(entry => new ThreadEntry(this, entry))
-    //TODO this is hacked in here, no chance to update this messages on a regular basis....
-    // let promises = []
-    for (let entry of this.entries) {
-      if (entry.message == null) {
-        this.manager.server.getMessage(this.ID).then((result) => this.manager.store.updateStore(result.data)).catch(this.manager.store.state.handleError)
-        // let promises.push(download)
+  async update(thread: MailpileInterfaces.IMessageThread): Promise<void> {
+    this.entries = thread.map(entry => new ThreadEntry(this, entry)) //TODO recreating is obviously wasteful...
+    //TODO not very nice, we fetch further data during the update procedure. Would be good to get all the relevant data in the first run
+    await Promise.all(this.entries.map(async (e) => {
+      if (e.message == null) {
+        await this.manager.store.messages.loadMessage(e.messageID)
       }
-    }
+    }))
   }
 }

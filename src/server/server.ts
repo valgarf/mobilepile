@@ -2,12 +2,15 @@
 import {Injectable} from '@angular/core'
 import {Http, Response, Headers, RequestOptions, URLSearchParams} from '@angular/http'
 import {Observable} from 'rxjs/Rx'
+import {observable} from 'mobx'
 
 import * as Lib from '@root/lib'
 import {MailpileInterfaces} from './interfaces'
 
 @Injectable()
 export class Server {
+  @observable authenticated: boolean = false;
+
   url: string = ""; //"http://localhost:33411"
   password: string = "";
   api: string = "/api/0"
@@ -41,6 +44,9 @@ export class Server {
   }
 
   private async _request(url: string, body: RequestOptions | URLSearchParams = null): Promise<MailpileInterfaces.IServerResponse> {
+    if (!this.authenticated) {
+      throw new Lib.ConnectionError('Currently we are not connected and authenticated. Please log in again', null, ['expected'], null, false, false)
+    }
     if (body == null) {
       body = new RequestOptions({ withCredentials: true })
     }
@@ -70,13 +76,12 @@ export class Server {
     let self = this
     let observable = Observable.interval(500) // check every 500ms if last poll finished
       // .filter((evt) => self.authenticated) // IMPORTANT block polling if we are not authenticated
-      .map((r) => { console.log('poll'); return r; }) //DEBUG write to console to show that we are still alive
+      .do((r) => { Lib.log.trace(['poll'], 'poll') }) //DEBUG write to console to show that we are still alive
       // .exhaustMap(() => {return this.http.get(this.url+this.api+'/eventlog/',  new RequestOptions({ withCredentials: true, search: body}))}) // exhaustMap: only poll if previous poll finished
       .exhaustMap(() => {
         let body = new URLSearchParams();
         body.set('wait', '30');
         body.set('since', self._lastPoll.toString());
-        // console.log('Poll events')
         return this.http.get(this.url + '/logs/events/as.json', new RequestOptions({ withCredentials: true, search: body }))
       }) // exhaustMap: only poll if previous poll finished
       // .let(self._handleConnectionError) // IMPORTANT
@@ -87,7 +92,9 @@ export class Server {
         let date = new Date(last.date)
         this._lastPoll = date.valueOf() / 1000
       }).take(5)
-      .subscribe(Lib.logfunc)
+      .subscribe((data) => {
+        Lib.log.trace(['poll', 'events'], data)
+      })
     return observable
   }
 

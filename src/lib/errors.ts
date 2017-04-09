@@ -1,14 +1,18 @@
 
 export class DerivedError extends Error {
-  constructor(public message: string, public details: any = 'No further details available', public tags: string[] = []) {
+  constructor(public message: string, public details: any = null, public tags: string[] = null, public name: string = null,
+    public show: boolean = true, public log: boolean = true) {
     super(message)
-    this.name = this.constructor.name
-    console.log('Concluded name:', this.name)
-    let defaultTags = _defaultTags[this.constructor.name]
-    if (defaultTags != null) {
-      this.tags = this.tags.concat(defaultTags)
+    if (this.details == null) {
+      this.details = 'No further details available'
     }
-    //.split(/(?=[A-Z])/).join(' ')  -> would put empty sapces in the name.
+    if (tags == null) {
+      this.tags = []
+    }
+    if (name == null) {
+      this.name = 'DerivedError'
+    }
+
   }
 
   toString(): string {
@@ -16,21 +20,31 @@ export class DerivedError extends Error {
   }
 }
 
-const _defaultTags = {
-  RuntimeError: ['runtime'],
-  ConnectionError: ['connection'],
-  AuthenticationError: ['authentication'],
-};
-
-export class RuntimeError extends DerivedError { };
-export class ConnectionError extends DerivedError { };
-export class AuthenticationError extends DerivedError { };
-export class WrappingError extends DerivedError {
-  constructor(public message: string, public details: any = 'No further details available', name: string = null, public tags: string[] = []) {
-    super(message, details, tags)
-    if (name != null) {
-      this.name = name
+function addTags(defaultTags: string[] = []) {
+  function wrapper(target: any) {
+    var original = target;
+    var createErrorInstance: any = function(message: string, details: any = null, tags: string[] = null, name: string = null,
+      show: boolean = true, log: boolean = true) {
+      if (tags == null) {
+        tags = []
+      }
+      return new original(message, details, defaultTags.concat(tags), name == null ? original.name : name, show, log)
     }
+    createErrorInstance.prototype = original.prototype;
+    return createErrorInstance;
+  }
+  return wrapper
+}
+
+@addTags(['unspecific']) export class RuntimeError extends DerivedError { };
+@addTags(['connection']) export class ConnectionError extends DerivedError { };
+@addTags(['authentication']) export class AuthenticationError extends DerivedError { };
+@addTags(['type']) export class UnknownTypeError extends DerivedError { };
+
+export class WrappingError extends DerivedError {
+  constructor(public message: string, public details: any = null, public tags: string[] = null, name: string = null,
+    public show: boolean = true, public log: boolean = true) {
+    super(message, details, ['wrapped'].concat(tags == null ? [] : tags), name == null ? 'WrappingError' : name, show, log)
   }
 };
 
@@ -51,6 +65,15 @@ export namespace error {
     if (err.message != null) {
       message = err.message
     }
-    return new WrappingError(message, err, name)
+    let tags = []
+    if (err.tags != null) {
+      tags = err.tags
+    }
+    return new WrappingError(message, err, tags, name)
+  }
+
+  export function setExpected(err) {
+    err.show = false;
+    err.log = false;
   }
 }

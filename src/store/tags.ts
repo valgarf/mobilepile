@@ -1,6 +1,7 @@
 import {observable, computed, autorun, action, ObservableMap} from 'mobx'
 import {sprintf} from 'sprintf-js'
 
+import * as Lib from '@root/lib'
 import {MailpileInterfaces, Server, str2color} from '@root/server'
 import {Store} from './store'
 
@@ -16,7 +17,7 @@ export class TagManager {
 
   constructor(public store: Store, private _server: Server) {
     autorun(() => {
-      console.log("MOBX TAGS:", this.root.filter((tag) => tag.visible))
+      Lib.log.debug(['data', 'change', 'autorun', 'tag'], "visible tags:", this.root.filter((tag) => tag.visible))
     })
   }
 

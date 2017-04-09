@@ -86,7 +86,7 @@ export namespace MailpileInterfaces {
     }
   }
 
-  export type IMessageEntry = [string, "", [any]] | [string, "r", [string]] | [string, "├", [any]] | [string, "└", [any]]
+  export type IMessageEntry = [string, "", [any]] | [string, "┌", [string]] | [string, "├", [any]] | [string, "└", [any]]
   export type IMessageThread = IMessageEntry[];
 
   export interface ITag {

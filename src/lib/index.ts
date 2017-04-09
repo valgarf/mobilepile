@@ -45,5 +45,3 @@ export async function delay(time: number): Promise<void> {
     setTimeout(resolve, time)
   })
 }
-
-export var logfunc = console.log.bind(console)

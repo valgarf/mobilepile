@@ -28,6 +28,7 @@ export class TagmenuPage {
   onSelect(tag: Tag) {
     let navCtrl = <NavController>this.menuCtrl.get().content
     navCtrl.setRoot(MailboxPage, { tag: tag })
+    this.menuCtrl.close()
     //navCtrl.popToRoot()
   }
 }

@@ -3,6 +3,7 @@ import {observable, computed} from 'mobx'
 
 import {Store, Thread, Message} from '@root/store'
 
+
 @Component({
   selector: 'mail-info',
   templateUrl: 'mail_info.html',
