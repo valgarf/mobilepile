@@ -6,6 +6,10 @@ import * as Lib from '@root/lib'
 import {Store, Tag, TagDisplayType} from '@root/store'
 import {MailboxPage} from '../mailbox/mailbox'
 
+
+/**
+ * Menu that shows all the different tags using the tagitem component
+ */
 @Component({
   selector: 'page-tagmenu',
   templateUrl: 'tagmenu.html',

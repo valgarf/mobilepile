@@ -7,6 +7,11 @@ import {observable} from 'mobx'
 import * as Lib from '@root/lib'
 import {MailpileInterfaces} from './interfaces'
 
+
+/**
+ * Server class for interacting with the Mailpile server.
+ *
+ */
 @Injectable()
 export class Server {
   @observable authenticated: boolean = false;
@@ -27,6 +32,9 @@ export class Server {
     // this.poll()
   }
 
+  /**
+   * transform errors that happen during a request
+   */
   private async _requestErrorHandling(req: Observable<Response>): Promise<any> {
     try {
       let reply = await req.toPromise();
@@ -43,6 +51,9 @@ export class Server {
     }
   }
 
+  /**
+   * Create a new 'get' request with given options
+   */
   private async _request(url: string, body: RequestOptions | URLSearchParams = null): Promise<MailpileInterfaces.IServerResponse> {
     if (!this.authenticated) {
       throw new Lib.ConnectionError('Currently we are not connected and authenticated. Please log in again', null, ['expected'], null, false, false)
@@ -72,7 +83,7 @@ export class Server {
     return true;
   }
 
-  poll() {
+  poll() { // Currently not in use
     let self = this
     let observable = Observable.interval(500) // check every 500ms if last poll finished
       // .filter((evt) => self.authenticated) // IMPORTANT block polling if we are not authenticated

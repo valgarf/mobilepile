@@ -1,6 +1,13 @@
+/**
+ * @file Custom logging solution for logging to a console
+ */
 
 export enum LogLevel { TRACE, DEBUG, INFO, WARN, ERROR }
 
+
+/**
+ * The main class to handle loggin, only created ONCE in this file.
+ */
 class Log {
 
   private _filter: string[] = []
@@ -9,6 +16,14 @@ class Log {
   constructor() {
   }
 
+  /**
+   * The actual logging function
+   *
+   * @param  {LogLevel} level:
+   * @param  {string} color: color to use for this entry (currently color corresponds to the log level)
+   * @param  {string | string[]} tags: tags for this entry
+   * @param  {any[]} msg: message(s) to log
+   */
   private log(level: LogLevel, color: string, tags: string | string[], ...msg: any[]) {
     if (level < this.level) {
       return
@@ -40,6 +55,10 @@ class Log {
     console.log(`%c ${date.toLocaleString()} ${LogLevel[level]} [${tagstr}]`, `color:${color};`, ...msg, )
   }
 
+  /*
+   * Logging functions for specific level, the actual public interface.
+   */
+
   public error = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.ERROR, 'red', tags, ...msg) };
   public warn = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.WARN, '#e08e02', tags, ...msg) };
   public info = (tags: string | string[], ...msg: any[]) => { this.log(LogLevel.INFO, 'green', tags, ...msg) };
@@ -50,6 +69,12 @@ class Log {
     this._filter = []
   }
 
+  /**
+   * sets a filter on the logging mechanism, i.e. only log messages that have a specific tag.
+   * TODO: expand this to something that also allows to sepcify which filters not to use or different combinations of tags.
+   *
+   * @param  {string | string[]} tags: the tags to show in the log
+   */
   public setFilter(tags: string | string[]) {
     if (!Array.isArray(tags)) {
       tags = [tags]
@@ -58,17 +83,17 @@ class Log {
   }
 }
 
+/**
+ * global instance of the logger
+ */
 export const log = new Log()
+
+/*
+ * Exposing the logging object to the window
+ */
+
 function _window(): any {
   return window;
 }
 _window().log = log
 _window().loglevel = LogLevel
-_window().logtest = () => {
-  let testobj = { a: 1, b: { c: 2 } };
-  log.error('test', 'something very bad happened!', testobj)
-  log.warn('test', 'something bad happened!', testobj)
-  log.info(['test', 'connection'], 'something happened!', testobj)
-  log.debug('test-other', 'something happened that I want to know.', testobj)
-  log.trace('notest', 'something uninteresting happened', testobj)
-}

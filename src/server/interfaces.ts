@@ -1,7 +1,12 @@
+
+/**
+ * This are the interfaces for the data that is returned by Mailpile
+ */
+
 export namespace MailpileInterfaces {
 
   export interface IAddress {
-    address: string; // email address "stefan@j-schulz.de",
+    address: string; // email address,
     "crypto-policy"?: string; // "best-effort",
     "flags": {
       profile?: boolean;
@@ -13,7 +18,7 @@ export namespace MailpileInterfaces {
       mime: string; // e.g. "application/x-pgp-fingerprint",
       type: string; // e.g. "openpgp"
     }],
-    photo?: string; //encoded photo, e.g. "data:image/jpeg;base64,iVBO..."
+    photo?: string; //encoded image, e.g. "data:image/jpeg;base64,iVBO..."
     protocol: string // e.g. "smtp",
     rank: number; // ???
     "x-mailpile-rid"?: string // "e65587ba592"
@@ -52,8 +57,8 @@ export namespace MailpileInterfaces {
 
   export interface IMessageMetadata {
     body: {
-      list?: string; //email of an email-ist this is sent to  "fachschaft@fachschaft.physik.tu-darmstadt.de",
-      snippet: string; // start of the message "Hallo zusammen! Die Fachschaftssitzung wird ab"
+      list?: string; //email of an email-ist this is sent to,
+      snippet: string; // start of the message
     };
     // cc_aids: [], // ???
     crypto: {
@@ -64,15 +69,15 @@ export namespace MailpileInterfaces {
       unread: boolean;
     };
     from: {
-      address: string; // email address of the sender"marco.knoesel@t-online.de",
+      address: string; // email address of the sender,
       aid: string; // ID of the address
       // flags: {}  // ???,
-      fn: string; // Name of the sender "Marco Knösel",
+      fn: string; // name of the sender,
       protocol: string; // protocol used, most-likely "smtp",
       rank: number; // ???
     };
     id: string; // ???  longish id, no idea what for
-    mid: string; // id of the metadata (and message?),
+    mid: string; // id of the metadata and message,
     msg_kb: number; // size of the message in kb ???,
     parent_mid: string; // parent metadata id??, something with threads... can be the same as the mid (when there is no parent? strange choice...)
     subject: string;
@@ -90,7 +95,7 @@ export namespace MailpileInterfaces {
   export type IMessageThread = IMessageEntry[];
 
   export interface ITag {
-    display: string; //"tag" oder "invisible"
+    display: string; //"tag" or "invisible"
     icon: string; //icon name
     label: boolean;
     label_color: string; // annoying string names like '11-orange-red'... just WHY?
@@ -133,7 +138,7 @@ export namespace MailpileInterfaces {
       total: number; // number of search results
     },
     summary: string; //Search description default: "Search: all:mail",
-    thread_ids: [string]; //the ordered result of the search as thread_ids
+    thread_ids: [string]; //the ordered result of the search as message(!!) ids. Naming is inconsistent here
     view_pairs: {}; // ???
   }
 

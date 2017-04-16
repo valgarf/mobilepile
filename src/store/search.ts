@@ -8,6 +8,12 @@ import {Thread} from './threads'
 import {Message} from './messages'
 
 
+/**
+ * This class manages searches.
+ * It ensures that data is cached and that previously run searches are still available, that is
+ * Opening a tag for the first time takes a while, but the second time the cached results are used (until fresh data is available from the server)
+ *
+ */
 export class SearchManager {
   @observable all: ObservableMap<Search> = new ObservableMap<Search>();
 
@@ -72,6 +78,7 @@ export class Search {
       Lib.log.debug(['data', 'change', 'autorun', 'search'], `threads for query '${query}' and order '${order}': `, this.threads)
     })
     //TODO maybe make 'amount' private? then we do not have to listen to it anymore. Currently the changes only become active with the next refresh...
+    // This reaction calls refresh if relevant internal data changes. Otherwise we would have to wait for the next scheduled refresh...
     this._handle = reaction((): any => {
       let result = {
         offset: this.offset,
@@ -91,19 +98,20 @@ export class Search {
   @action public async loadMore(num: number): Promise<void> {
     runInAction(() => { this.amount += num })
     let res: MailpileInterfaces.IResultSearch = await this.manager.server.searchOnce(this.query, this.order, this.offset + this.amount - num + 1, this.offset + this.amount)
-    let promise = this.manager.store.updateStore(res.data)
+    let promise = this.manager.store.updateStore(res.data) // the new data must be put into the store, but we wait for the result later
+
     if (this.messageIDs.length == this.amount - num) {
       runInAction(() => { this.messageIDs = this.messageIDs.concat(res.thread_ids) }) // Inconsistency in the interfaces: the 'thread_ids' are actually message ids.
     }
     else {
-      Lib.log.warn(['search', 'loading'], `loadMore was beaten by the refresh method.num to fetch: ${num}, expected total of ${this.amount} messages.We already have ${this.messageIDs.length} messages`,
+      Lib.log.warn(['search', 'loading'], `loadMore was beaten by the refresh method. num to fetch: ${num}, expected total of ${this.amount} messages.We already have ${this.messageIDs.length} messages`,
         this.messageIDs, res)
     }
 
-    await promise;
+    await promise; // await store update
   }
   @action public async refresh(): Promise<void> {
-    if (!this.active) {
+    if (!this.active) { //only refresh if this search is actually in use
       return
     }
     // // ---- CODE used for joining multiple requests, we can just make one request

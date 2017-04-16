@@ -5,9 +5,16 @@ import * as Lib from '@root/lib'
 import {Server} from '@root/server'
 import {Store} from './store'
 
+
+/**
+ * This handles internal state of the App and also works as a controller.
+ *  - refreshes the store in regular intervals, emits a 'pulse' observable.
+ *  - handles errors
+ *  - handles login
+ *  - handles UIMessages (typically errors that are shown in the UI, like "wrong password")
+ */
 export class StateManager {
 
-  // @observable authenticated: boolean = false;
   @computed get authenticated(): boolean {
     return this.server.authenticated
   }
@@ -37,33 +44,34 @@ export class StateManager {
     // If refreshing takes longer (i.e. slow internet connection) the pulse will slow down.
     let timeoutHandle = null;
     let heartbeat = async () => {
-      if (!this.authenticated) {
+      if (!this.authenticated) { // no connection to the server, no hearbeat (we died :( )
         return;
       }
-      try {
+      try { // refresh the store and call this function again in some time
         Lib.log.debug(['pulse'], 'PULSE')
-        this.pulse.next(true)
+        this.pulse.next(true) // emit observable pulse
         await this.store.refresh()
         timeoutHandle = setTimeout(heartbeat, 20000)
       }
-      catch (err) {
+      catch (err) { // refreshing did not work as expected, check if we are still connected
         err = Lib.error.ensureErrorObject(err)
         if (err instanceof Lib.ConnectionError || err instanceof Lib.AuthenticationError || (err.tags != null && err.tags.includes("connection"))) {
+          // too bad connection or authentication seems to be lost
           runInAction(() => { this.authenticated = false })
         }
         Lib.error.attachTags(err, ['pulse'])
         this.handleError(err)
-        if (this.authenticated) {
-          timeoutHandle = setTimeout(heartbeat, 5000) //retry refresh after a short time
+        if (this.authenticated) { //some not connection related error appeared, retry after a shorter time (beat faster!)
+          timeoutHandle = setTimeout(heartbeat, 5000)
         }
       }
     }
-    autorun(() => {
+    autorun(() => { //automatically run if this.authenticated changes
       this.authenticatedObs.next(this.authenticated)
       if (this.authenticated) {
         heartbeat();
       }
-      else if (timeoutHandle != null) {
+      else if (timeoutHandle != null) { //not authenticated anymore, stop the heartbeat
         clearTimeout(timeoutHandle)
       }
     })
@@ -87,6 +95,11 @@ export class StateManager {
     }
   }
 
+  /**
+   * handles errors, typically by logging or showing them to the user or both.
+   *
+   * @param  {any} error: the error object
+   */
   handleError(error: any) {
     let tags = []
     if (error.tags != null) {
@@ -113,6 +126,7 @@ export class StateManager {
     }
   }
 }
+
 
 export enum UIMessageType { info, warning, error }
 export class UIMessage {

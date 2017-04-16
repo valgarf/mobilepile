@@ -6,6 +6,9 @@ import * as Lib from '@root/lib'
 import {Store, Thread, Message} from '@root/store'
 import {MailViewPage} from '../mailview/mailview'
 
+/**
+ * Shows all messages from a given thread in a list of mail_info components
+ */
 @Component({
   selector: 'page-threadview',
   templateUrl: 'threadview.html',

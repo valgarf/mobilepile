@@ -1,3 +1,21 @@
+####
+# This script 'inverts' all svgs given as argument that do not end in '-inverted.svg'.
+# All output svgs are stored with the '-inverted.svg' ending.
+# It is safe to call 'python invert.py *.svg' in the icon folder
+#
+# Inverting means the following: we expect black and white images.
+# After inversion, the white parts will stay white and the black parts are transparent.
+# In an svg viewer this looks like a completely white image but if there is colored
+# background behind the image, you get the black icon in a different color.
+#
+# Inversion is done by wrapping the original svg in a <mask> element.
+# We then create a white rectangle that uses this mask
+# The rectangle is larger than the original image, which yield a white border.
+# This is important for .css styling: The colored background can be smaller than
+# the image (otherwise one gets artifacts like very thin colored borders) and still
+# cover the whole original image.
+####
+
 import sys
 
 def invertSVG(name):

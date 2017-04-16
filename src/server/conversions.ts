@@ -1,3 +1,7 @@
+/**
+ * Conversion functions for server data
+ */
+
 let _colors = [
   '#CCCCCC',
   '#B3B3B3',
@@ -23,7 +27,7 @@ let _colors = [
  *
  * If the string starts with '#', it is left as is
  *
- * @param  {string} col color as index + human readable string
+ * @param  {string} col: color as index + human readable string
  * @return {string} color as hex color code
  */
 export function str2color(col: string): string {

@@ -25,15 +25,13 @@ export class TagManager {
     return this.all.get(id)
   }
 
-  // private _lastRefresh = null //maybe check for changes before updating? might reduce UI updates
   async refresh(): Promise<void> {
     let tagReply = await this._server.tagsOnce()
-    //.distinctUntilChanged( (a,b) => JSON.stringify(a)== JSON.stringify(b) ) //anything faster than stringify?
     this.update(tagReply.tags)
   }
 
   @action public update(taglist: MailpileInterfaces.ITag[] | { [tid: string]: MailpileInterfaces.ITag }) {
-    let updateTag = (tag: MailpileInterfaces.ITag) => {
+    let updateTag = (tag: MailpileInterfaces.ITag) => { //update function for each tag
       let tagobj = this.getByID(tag.tid)
       if (tagobj == null) {
         tagobj = new Tag(tag.tid, this)
@@ -42,6 +40,7 @@ export class TagManager {
       tagobj.update(tag)
     }
 
+    // apply update function either to each list element or to each value in the map
     if (Array.isArray(taglist)) {
       for (let tag of taglist) {
         updateTag(tag)

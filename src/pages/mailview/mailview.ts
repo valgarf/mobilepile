@@ -5,6 +5,9 @@ import {observable, computed, autorun} from 'mobx'
 
 import {Store} from '@root/store'
 
+/**
+ * Shows a single mail in an iframe or as simple text
+ */
 @Component({
   selector: 'page-mailview',
   templateUrl: 'mailview.html',
@@ -12,7 +15,7 @@ import {Store} from '@root/store'
 })
 export class MailViewPage {
   @observable messageID: string;
-  @observable allow_html: boolean = true;
+  @observable allow_html: boolean = true; //TODO: ask the user first? global settings?
 
   @computed get message() {
     return this.store.messages.getByID(this.messageID)

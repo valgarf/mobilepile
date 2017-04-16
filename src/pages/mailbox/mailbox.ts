@@ -7,6 +7,11 @@ import {Store, Search, Tag, Message} from '@root/store'
 import {MailViewPage} from '../mailview/mailview'
 import {ThreadViewPage} from '../threadview/threadview'
 
+
+/**
+ * This page shows a mailbox or a search. In both cases the resulting threads are presented in a list of mail_info components
+ *
+ */
 @Component({
   selector: 'page-mailbox',
   templateUrl: 'mailbox.html',
@@ -19,6 +24,7 @@ export class MailboxPage {
 
   constructor(public navCtrl: NavController, private navParams: NavParams, private store: Store) {
     Lib.bindMethods(this)
+    // obtain query from navigation parameters and get a search object from the store
     let tag: Tag = navParams.get('tag')
     let query: string
     if (tag != null) {
@@ -42,6 +48,12 @@ export class MailboxPage {
     this.search.loadMore(20).then(() => infiniteScroll.complete()).catch(this.store.state.handleError)
   }
 
+  /**
+   * Some mail in the list has been clicked and should be opened.
+   * Opens the mail if it is a single mail. If it belongs to a thread, open a ThreadView
+   *
+   * @param  {Message} mail: The message to open
+   */
   open(mail: Message) {
     Lib.log.trace(['message', 'open', 'data'], 'Mail to be opened:', mail)
     if (mail.thread.entries.length > 1) {

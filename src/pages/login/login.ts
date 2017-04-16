@@ -21,15 +21,22 @@ export class LoginPage {
     this.password = this.store.state.password
   }
 
+  /**
+   * This page can only be closed when we are authenticated. It should do so automatically after successful authentication
+   * (see handleAuthNavigation in app/app.component.ts)
+   */
   ionViewCanLeave(): boolean {
     return this.store.state.authenticated
   }
 
+  /**
+   * Login button pressed. Try to login with given credentials
+   */
   login() {
     if (!this.allowSubmission) {
       return
     }
-    this.allowSubmission = false
+    this.allowSubmission = false // block further clicks on the login button
 
     let self = this
     this.store.state.url = this.url

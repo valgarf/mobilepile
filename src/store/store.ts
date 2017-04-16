@@ -10,6 +10,11 @@ import {SearchManager} from './search'
 import {StateManager} from './state'
 
 
+/**
+ * The store class handles all kinds of data returned form the server and stores parts of the current state of the App
+ * Obtaining data from the server is also done within the store by using the server interface
+ * The different mangers all use mobx, which makes it easy to listen to any changes in the data.
+ */
 @Injectable()
 export class Store {
 
