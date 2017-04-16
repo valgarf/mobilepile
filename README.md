@@ -1,4 +1,4 @@
-This App works as a client to a Mailpile server.
+This App works as a client to a [Mailpile](https://www.mailpile.is/) server.
 It is currently in a VERY EARLY stage.
 If you want to help with development or testing, you are very welcome to do so.
 
